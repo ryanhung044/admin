@@ -85,12 +85,10 @@ class SessionController extends Controller
         try {
             // Lấy bản ghi ca học cần cập nhật
             $session = $this->sessionRepository->getModel()->where('cate_code', $code)->first();
-
             // Kiểm tra xem ca học có tồn tại không
             if (!$session) {
                 return response()->json(["message" => "Ca học không tồn tại."], 404);
             }
-
             // Chuyển đổi thời gian bắt đầu và kết thúc từ request
             $timeStart = Carbon::parse($request->time_start);
             $timeEnd = Carbon::parse($request->time_end);

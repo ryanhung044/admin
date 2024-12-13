@@ -303,11 +303,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-
 Route::apiResource('transaction', TransactionController::class);
 Route::apiResource('wallet', WalletController::class);
 Route::apiResource('feedback', FeedbackController::class);
-
 
 Route::get('send-email', [SendEmailController::class, 'sendMailFee']);
 Route::get('send-email2', [SendEmailController::class, 'sendMailFeeUser']);
@@ -327,17 +325,18 @@ Route::post('services/change-major/{user_code}',            [ServiceController::
 
 // cung cấp thẻ sinh viên
 Route::post('services/register/dang-ky-cap-lai-the',        [ServiceController::class, 'provideStudentCard']);
+
 Route::post('services/register/dang-ky-cap-bang-diem',      [ServiceController::class, 'provideScoreboard']);
 
 Route::apiResource('fees', FeeController::class);
 Route::get('momo-payment', [CheckoutController::class, 'momo_payment']);
 Route::get('total_momo/learn-again', [CheckoutLearnAgainController::class, 'momo_payment']);
 
-Route::post('/forgot-password', [ForgetPasswordController::class, 'forgetPasswordPost'])
-    ->name('forget.password.post');
+Route::post('/forgot-password', [ForgetPasswordController::class, 'forgetPasswordPost']);
 
-Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost'])
-    ->name('reset.password.post');
+
+Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost']);
+
 
 
 

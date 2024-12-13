@@ -169,14 +169,14 @@ class CheckoutController extends Controller
 
 
     public function vnpay_payment(){
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        $vnp_Returnurl = "https://localhost/vnpay_php/vnpay_return.php";
+        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // trang tra ve khi thanh toan
+        $vnp_Returnurl = "http://127.0.0.1:8000/return-vnpay"; // trang tra ve khi thanh cong
         $vnp_TmnCode = "9COLR8TJ";//Mã website tại VNPAY
         $vnp_HashSecret = "E67F1MFW7JK7PGV3TIVR9HUJAGZSOIMA"; //Chuỗi bí mật
 
         $vnp_TxnRef = Carbon::now();
-        $vnp_OrderInfo = "tich hợp thanh toán";
-        $vnp_OrderType = "hehehe";
+        $vnp_OrderInfo = "Thanh toán hóa đơn phí dich vụ";
+        $vnp_OrderType = "billpayment";
         $vnp_Amount = 10000 * 100;
         $vnp_Locale = "VN";
         $vnp_BankCode = "NCB";
@@ -198,7 +198,7 @@ class CheckoutController extends Controller
             "vnp_OrderType" => $vnp_OrderType,
             "vnp_ReturnUrl" => $vnp_Returnurl,
             "vnp_TxnRef" => $vnp_TxnRef,
-          
+
         );
 
         if (isset($vnp_BankCode) && $vnp_BankCode != "") {
@@ -228,14 +228,35 @@ class CheckoutController extends Controller
             $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
-        $returnData = array('code' => '00'
-            , 'message' => 'success'
-            , 'data' => $vnp_Url);
-            if (isset($_POST['redirect'])) {
-                header('Location: ' . $vnp_Url);
-                die();
-            } else {
-                echo json_encode($returnData);
-            }
+        // $returnData = array('code' => '00'
+        //     , 'message' => 'success'
+        //     , 'data' => $vnp_Url);
+        //     if (isset($_POST['redirect'])) {
+        //         header('Location: ' . $vnp_Url);
+        //         die();
+        //     } else {
+        //         echo json_encode($returnData);
+        //     }
+
+        return redirect($vnp_Url);
     }
-}
+
+    public function vnpay_payment_return(Request $request){
+        // $url = session('url_prev','/');
+        if($request->vnp_ResponseCode == "00") {
+            $this->thanhtoanonline(1);
+            return response()->json(['success' =>'Đã thanh toán phí dịch vụ']);
+        }
+        session()->forget('url_prev');
+        return response()->json(['errors' =>'Lỗi trong quá trình thanh toán phí dịch vụ']);
+
+    }
+
+    public function thanhtoanonline($costId)
+    {
+            return "hello";
+    }
+    }
+
+
+

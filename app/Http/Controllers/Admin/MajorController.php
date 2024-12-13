@@ -120,36 +120,36 @@ class MajorController extends Controller
         // return response()->json($request, 201);
 
         DB::beginTransaction();
-        // try {
-        $listMajor = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+        try {
+            $listMajor = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
 
-        if (!$listMajor) {
-            DB::rollBack();
+            if (!$listMajor) {
+                DB::rollBack();
 
-            return $this->handleInvalidId();
-        } else {
-            $params = $request->except('_token', '_method');
-            // Kiểm tra parent_code hợp lệ hoặc null
-
-            if ($request->hasFile('image')) {
-                if ($listMajor->image && Storage::disk('public')->exists($listMajor->image)) {
-                    Storage::disk('public')->delete($listMajor->image);
-                }
-                $fileName = $request->file('image')->store('uploads/image', 'public');
+                return $this->handleInvalidId();
             } else {
-                $fileName = $listMajor->image;
+                $params = $request->except('_token', '_method');
+                // Kiểm tra parent_code hợp lệ hoặc null
+
+                if ($request->hasFile('image')) {
+                    if ($listMajor->image && Storage::disk('public')->exists($listMajor->image)) {
+                        Storage::disk('public')->delete($listMajor->image);
+                    }
+                    $fileName = $request->file('image')->store('uploads/image', 'public');
+                } else {
+                    $fileName = $listMajor->image;
+                }
+                $params['image'] = $fileName;
+                $listMajor->is_active =  $params['is_active'];
+                $listMajor->update($params);
+                DB::commit();
+
+                return response()->json($listMajor, 201);
             }
-            $params['image'] = $fileName;
-            $listMajor->is_active =  $params['is_active'];
-            $listMajor->update($params);
-            DB::commit();
+        } catch (Throwable $th) {
 
-            return response()->json($listMajor, 201);
+            return $this->handleErrorNotDefine($th);
         }
-        // } catch (Throwable $th) {
-
-        //     return $this->handleErrorNotDefine($th);
-        // }
     }
 
     /**

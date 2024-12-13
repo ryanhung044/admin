@@ -22,7 +22,7 @@ class UserFactory extends Factory
             'full_name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
             'phone_number' => fake()->phoneNumber(),
             'address' => fake()->address(),
@@ -32,10 +32,10 @@ class UserFactory extends Factory
             'issue_date' => fake()->dateTimeThisCentury(),
             'place_of_grant' => fake()->city(),
             'nation' => 'Kinh',
-            'avatar' => fake()->imageUrl(),
-            'major_code' => 'CN01', 
-            'course_code' => 'K01', 
-            'semester_code' => 'S01',
+            'avatar' => null,
+            'major_code' => 'WD', 
+            'course_code' => '1', 
+            'semester_code' => 'S1',
             'role' => '3',
         ];
     }

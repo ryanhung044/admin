@@ -178,7 +178,7 @@ class NewsletterController extends Controller
                 }
                 $params['image'] = $fileName;
                 $newsletters->update($params);
-                DB::rollBack();
+                DB::commit();
 
                 return response()->json($newsletters, 201);          
             }

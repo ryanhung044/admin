@@ -18,18 +18,14 @@ return new class extends Migration
                     ->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('service_name');
             $table->text('content');
-            $table->enum('status',['pending','approved','rejected',])->default('pending');
-
+            $table->enum('status',['pending','paid','approved','rejected',])->default('pending');
             $table->text('reason')->nullable()->default(null);
             $table->decimal('amount',15,0)->default(0);
             $table->string('file_path')->nullable();
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('service');

@@ -41,11 +41,14 @@ Route::get('total_momo', [CheckoutController::class, 'momo_payment']);
 Route::post('/payment-callback', [CheckoutController::class, 'handleCallback']);
 Route::get('/payment-success', [CheckoutController::class, 'handleCallback']);
 
-
+//view
 Route::get('/forgot-password', [ForgetPasswordController::class,'forgetPassword'])
                                             ->name('forget.password');
+//trả email
 Route::post('/forgot-password', [ForgetPasswordController::class,'forgetPasswordPost'])
                                             ->name('forget.password.post');
+
+// view đổi mật khẩu
 Route::get('/reset-password', [ForgetPasswordController::class,'resetPassword'])
                                             ->name('reset.password');
 Route::post('/reset-password',[ForgetPasswordController::class, 'resetPasswordPost'])
@@ -61,8 +64,10 @@ Route::post('/send-email/learn-again/{id}/{subject_code}',  [SendEmailController
 
 
 
-Route::post('total_vnpay', [CheckoutController::class, 'vnpay_payment']);
+Route::post('total_vnpay', [CheckoutController::class, 'vnpay_payment'])->name('total_vnpay');
 
 Route::get('button_payment', function(){
-    return view();
+    return view('test');
 });
+
+Route::get('return-vnpay', [CheckoutController::class, 'vnpay_payment_return']);

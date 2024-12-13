@@ -433,7 +433,7 @@ class ClassroomController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Classroom  $classRoom
+     * @param  \App\Models\Classroom  $Classroom
      * @return \Illuminate\Http\Response
      */
     public function show(string $classCode)
@@ -453,7 +453,7 @@ class ClassroomController extends Controller
                 },
                 'schedules' => function ($query) {
                     $query->select('class_code', 'room_code', 'session_code', 'date')
-                        ->orderBy('date', 'desc')->limit(1);
+                        ->limit(1);
                 },
                 'schedules.session' => function ($query) {
                     $query->select('cate_name', 'cate_code', 'value');
@@ -471,7 +471,6 @@ class ClassroomController extends Controller
                     'is_active' => true
                 ])->first();
 
-            // return response()->json($classroom);
 
             if (!$classroom) {
                 return $this->handleInvalidId();

@@ -236,11 +236,19 @@ class ScheduleController extends Controller
             // }
             // Kiểm tra lớp học hiện tại có tồn tại hay không!
             $classroom = Classroom::join('classroom_user', 'classroom_user.class_code', 'classrooms.class_code')
-            ->join('subjects', 'subjects.subject_code', 'classrooms.subject_code')
-            ->where('classrooms.class_code', $data['class_code'])
+                ->join('subjects', 'subjects.subject_code', 'classrooms.subject_code')
+                ->where('classrooms.class_code', $data['class_code'])
                 ->where('classroom_user.user_code', $student->user_code)
-                ->select('classrooms.id', 'classrooms.class_code','classrooms.class_name',
-                'classroom_user.user_code', 'subjects.subject_code', 'subjects.subject_name', 'subjects.semester_code', 'subjects.major_code')
+                ->select(
+                    'classrooms.id',
+                    'classrooms.class_code',
+                    'classrooms.class_name',
+                    'classroom_user.user_code',
+                    'subjects.subject_code',
+                    'subjects.subject_name',
+                    'subjects.semester_code',
+                    'subjects.major_code'
+                )
                 ->first();
 
 
@@ -270,7 +278,7 @@ class ScheduleController extends Controller
                     'schedules.room' => function ($query) {
                         $query->select('cate_code', 'cate_name', 'value');
                     }
-                ])->whereHas('subject',  function($query) use ($subject_code){
+                ])->whereHas('subject',  function ($query) use ($subject_code) {
                     $query->where('subject_code', $subject_code);
                 })
                 ->whereHas('schedules.session', function ($query) use ($data) {
@@ -317,12 +325,11 @@ class ScheduleController extends Controller
 
     public function handleTransferSchedule(HandleTransferSchedule $request)
     {
-        DB::beginTransaction();
         try {
-            
-            $data = $request->validated();
 
-            
+            $data = $request->validated();
+            $class_code_current = $data['class_code_current'];
+
             $timeFrame = TransferScheduleTimeframe::select('start_time', 'end_time')->first();
 
             // Lấy thời gian hiện tại
@@ -335,16 +342,18 @@ class ScheduleController extends Controller
                 ], 422);
             }
 
+            // Lấy thông tin đăng nhập hiện tại của sinh viên
             $student = request()->user();
             $student_code = $student->user_code;
-        
+
 
             if ($student->course_code != $data['course_code']) {
                 return response()->json(
                     [
                         'status' => false,
                         'message' => 'Khoá học không hợp lệ!'
-                    ]
+                    ],
+                    422
                 );
             }
 
@@ -357,17 +366,15 @@ class ScheduleController extends Controller
             }
 
             // Kiểm tra xem học sinh này hiện tại có học trong lớp học có mã lớp được gửi lên hay không?
-            $classroom_current = Classroom::join('classroom_user', 'classrooms.class_code', '=', 'classroom_user.class_code')
-            ->where('classroom_user.user_code', $student_code)
-                ->where([
-                    'classroom_user.class_code'=>  $data['class_code_current'],
-                    'classrooms.is_active' => true
-                ])
-                ->lockForUpdate()
-                ->select('classrooms.id', 'classrooms.class_code', 'classrooms.class_name',
-                'classroom_user.user_code', 'classrooms.subject_code')
-                ->first();
+            DB::beginTransaction();
 
+            $classroom_current = Classroom::withCount('users')
+                ->whereHas('users', function ($query) use ($student_code, $class_code_current) {
+                    $query->where('classroom_user.user_code', $student_code)
+                        ->where('classrooms.class_code', $class_code_current);
+                })->lockForUpdate()->first();
+
+            // Kiểm tra sinh viên có đang học lớp học hiện không
             if (!$classroom_current) {
                 return response()->json([
                     'status' => false,
@@ -375,6 +382,13 @@ class ScheduleController extends Controller
                 ], 404);
             }
 
+            // Kiểm tra giới hạn sinh viên có trong lớp hiện tại 
+            if ($classroom_current->users_count <= 25) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Lớp học đã đạt giới hạn tối thiểu, hiện tại không thể đổi lịch!'
+                ], 403);
+            }
 
             // Kiểm tra xem sinh viên này đã đổi lịch lần nào hay chưa?
             $class_code_transfered = TransferScheduleHistory::where([
@@ -390,7 +404,7 @@ class ScheduleController extends Controller
             }
 
             // Kiểm tra xem lớp học mục tiêu có tồn tại không?
-            $classroom_target = Classroom::select('class_code', 'class_name', 'subject_code', 'user_code')->withCount('users')->with(
+            $classroom_target = Classroom::withCount('users')->select('class_code', 'class_name', 'subject_code', 'user_code')->withCount('users')->with(
                 [
                     'schedules' => function ($query) {
                         $query->select('class_code', 'room_code', 'session_code', 'date');
@@ -404,11 +418,19 @@ class ScheduleController extends Controller
                 ]
             )->where('class_code', $data['class_code_target'])
                 ->lockForUpdate()->first();
+
             if (!$classroom_target) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Lớp học bạn muốn đổi không tồn tại!'
                 ], 404);
+            }
+            
+            if($classroom_target->Users_count >= 40){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Lớp học bạn muốn chuyển đến đã đạt giới hạn tối đa!'
+                ],403);
             }
 
 
@@ -419,13 +441,13 @@ class ScheduleController extends Controller
                     'message' => 'Khoá học giữa 2 lớp không trùng khớp!'
                 ], 403);
             }
-            if($classroom_current->subject_code !== $classroom_target->subject_code){
+
+            if ($classroom_current->subject_code !== $classroom_target->subject_code) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Môn học giữa 2 lớp không trùng khớp!'
                 ], 403);
-            } 
-
+            }
 
             // Lấy ra thông tin lịch, ca, phòng của lớp học mục tiêu
             $schedule = $classroom_target->schedules->first();
@@ -462,7 +484,7 @@ class ScheduleController extends Controller
 
             // Lấy ra các ngày học của lớp học mục tiêu
             $schedules_of_classroom_target = $classroom_target->schedules->pluck('date');
-            
+
             // Xoá các lịch điểm danh được tạo sẵn ở lớp học cũ của sinh viên này
             Attendance::where([
                 'student_code' => $student_code,
@@ -471,7 +493,7 @@ class ScheduleController extends Controller
 
             $now = now();
             $data_insert_to_attendance_table = [];
-            foreach($schedules_of_classroom_target as $date){
+            foreach ($schedules_of_classroom_target as $date) {
                 $data_insert_to_attendance_table[] = [
                     'student_code' => $student_code,
                     'class_code' => $classroom_target->class_code,

@@ -15,8 +15,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        \App\Models\User::factory(50)->create();
+        // \App\Models\User::factory(50)->create();
 
+        
         // User::create([
         //     'user_code' => 'AM' . fake()->unique()->numberBetween(100, 999), // Tạo mã sinh viên ngẫu nhiên ST100 - ST999
         //     'full_name' => fake()->name,
@@ -33,7 +34,6 @@ class DatabaseSeeder extends Seeder
         //     'avatar' => fake()->imageUrl(200, 200, 'people'), // URL avatar ngẫu nhiên
         //     'role' => '0',
         // ]);
-
         // User::create([
         //     'user_code' => 'TC' . fake()->unique()->numberBetween(100, 999),
         //     'full_name' => 'Giảng viên 1',
@@ -51,7 +51,5 @@ class DatabaseSeeder extends Seeder
         //     'role' => '2',
         //     'major_code' => 'CN01',
         // ]);
-
-
     }
 }

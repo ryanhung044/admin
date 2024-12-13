@@ -37,15 +37,15 @@ class ForgetPasswordController extends Controller
                     'created_at' => Carbon::now(),
                 ]
             );
-            $resetUrl = url("/reset-password?token=$token&email=$email");
+            $resetUrl = url("http://localhost:5173/reset-password/$token/$email");
 
             // Gửi email qua Job
             SendResetPasswordEmail::dispatch($email, $resetUrl);
 
             return response()->json(['message' => 'Vui lòng kiểm tra Email']);
+
         }catch(\Throwable $th){
             return response()->json(['message' => $th->getMessage()]);
-
         }
     }
 
@@ -53,16 +53,15 @@ class ForgetPasswordController extends Controller
         $token = $request->query('token');
         $email = $request->query('email');
 
-        // Trả về view reset-password với 'token' và 'email'
         return view('auth.reset-password', compact('token', 'email'));
     }
 
     function resetPasswordPost(Request $request){
        try{
         $request->validate([
-            'email' => 'required|email|exists:users,email', // Kiểm tra email tồn tại trong bảng users
-            'token' => 'required', // Kiểm tra token có được cung cấp không
-            'password' => 'required|confirmed|min:6', // Kiểm tra mật khẩu và xác nhận mật khẩu
+            'email' => 'required|email|exists:users,email',
+            'token' => 'required',
+            'password' => 'required|confirmed|min:6',
         ]);
 
         $password_reset = DB::table('password_reset_tokens')
@@ -76,9 +75,9 @@ class ForgetPasswordController extends Controller
         }
 
         User::where('email',$request->email)->update(['password' => bcrypt($request->password)]);
-        // Trả về lỗi nếu có vấn đề
-        return response()->json(['message' => 'Đổi mật khẩu thành công'], 400);
-       }catch(\Throwable $th){
+        return response()->json(['message' => 'Đổi mật khẩu thành công'], 200);
+       }
+       catch(\Throwable $th){
         return response()->json(['error' => $th->getMessage()]);
        }
 

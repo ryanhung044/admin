@@ -19,7 +19,7 @@
                             @csrf
                             <input type="hidden" name="token" value="{{ request()->query('token') }}">
                             <input type="hidden" name="email" value="{{ request()->query('email') }}">
-
+                            
                             <div class="mb-3">
                                 <label for="password" class="form-label">New Password</label>
                                 <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" required>

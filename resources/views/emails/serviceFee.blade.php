@@ -73,7 +73,7 @@
             <td>{{ $data['amount'] }}</td>
         </tr>
     </table>
-    <a href="https://admin.feduvn.com/total_momo/learn-again?id={{$data['id']}}&user_code={{$data['user_code']}}&subject_code={{$data['subject_code']}}">
+    <a href="https://admin.feduvn.com/total_momo/learn-again?id={{$data['id']}}&user_code={{$data['user_code']}}">
         Thanh toán ngay
     </a>
     <p class="note">Sinh viên có thắc mắc hoặc cần hỗ trợ thêm thông tin vui lòng liên hệ theo thông tin dưới đây trong

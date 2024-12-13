@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendEmailFeeService;
 use App\Mail\ServiceStatusChanged;
 use Illuminate\Support\Str;
 use App\Models\Category;
@@ -164,14 +165,6 @@ class ServiceController extends Controller
   }
 
 
-
-
-
-
-
-
-
-  // thay đổi trạng thái
   public function changeStatus(int $id, Request $request)
   {
     try {
@@ -243,21 +236,16 @@ class ServiceController extends Controller
   public function provideScoreboard(Request $request)
   {
     try {
-      // input số lượng bảng điểm- number_board
-      // số điện thoại - number_phone
-      // hình thức nhận [Chuyển phát nhanh, Nhận trực tiếp]
-      // địa chỉ - receive_address
-      // Ghi chú - note
       $validatedData = $request->validate([
-        'number_board'     => 'required|integer|min:1', // Số lượng bảng điểm, phải là số nguyên >= 1
-        'number_phone'     => 'required|string|max:15', // Số điện thoại, giới hạn 15 ký tự
-        'receive_method'   => 'required|string', // Hình thức nhận
+        'number_board'     => 'required|integer|min:1',
+        'number_phone'     => 'required|string|max:15',
+        'receive_method'   => 'required|string',
         'receive_address'  => 'nullable|string|max:255',
         'note'             => 'nullable|string|max:500',
-
       ]);
 
-      $user_code = $request->user()->user_code;
+    //   $user_code = $request->user()->user_code;
+        $user_code = $request->user_code;
       if (!$user_code) {
         return response()->json(['message' => 'không tìm thấy user_code']);
       }
@@ -282,8 +270,19 @@ class ServiceController extends Controller
         'content'       => $content,
         'amount'        => $amount
       ];
-
       $service = Service::create($data);
+      $user = User::where('user_code', $service->user_code)->firstOrFail();
+
+      $dataEmail = [
+        'id'            => $service->id,
+        'student_name'  => $user->full_name,
+        'user_code'     => $user_code,
+        'service_name'  => $service_name,
+        'content'       => $content,
+        'status'        => $service->status,
+        'amount'        => $amount
+      ];
+      Mail::to($user->email)->send(new SendEmailFeeService($dataEmail));
       return response()->json(['message' => 'gửi dịch vụ thành công', 'service' => $service]);
     } catch (\Throwable $th) {
       return response()->json([
@@ -294,8 +293,6 @@ class ServiceController extends Controller
   }
 
   public function changeInfo(Request $request)
-
-
   {
     try {
 
@@ -344,7 +341,6 @@ class ServiceController extends Controller
       $data = [
         'user_code'     => $user_code,
         'service_name'  => $service_name,
-
         'content'       => $content,
       ];
 
