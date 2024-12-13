@@ -13,7 +13,7 @@ class ScoreController extends Controller{
         $this->scoreRepository = $scoreRepository;
     }
     public function getById(){
-        $students = ClassRoom::all();
+        $students = Classroom::all();
         return response()->json($students);
     }
 
@@ -37,7 +37,7 @@ class ScoreController extends Controller{
         ];
 
         // Tìm lớp học
-        $classroom = ClassRoom::findOrFail(2);
+        $classroom = Classroom::findOrFail(2);
 
         // Cập nhật trường students với mảng JSON
         $classroom->update(['students' => $students]);
