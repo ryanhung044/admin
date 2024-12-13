@@ -433,7 +433,7 @@ class ClassroomController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Classroom  $Classroom
+     * @param  \App\Models\Classroom  $classRoom
      * @return \Illuminate\Http\Response
      */
     public function show(string $classCode)
