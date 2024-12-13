@@ -40,16 +40,26 @@ class AttendanceController extends Controller
     //  Hàm trả về thời gian bắt đầu ca học
     public function startTime($classCode)
     {
+        $dateNow = Carbon::now()->toDateString();
         $sessions = Schedule::where('class_code', $classCode)
+            ->whereDate('date', $dateNow)
             ->with('session')
-            ->get()
-            ->map(function ($session) {
-                return [
-                    'session' => $session->session ? $session->session->value : null
-                ];
-            });
-        $sessionData = json_decode($sessions[0]['session'], true);
+            ->get();
+
+        if ($sessions->isEmpty()) {
+            return null;
+        }
+
+        $sessionValue = $sessions->first()->session->value ?? null;
+
+        if (!$sessionValue || !is_string($sessionValue)) {
+            return null;
+        }
+
+        $sessionData = json_decode($sessionValue, true);
+
         $start = $sessionData['start'] ?? null;
+    
         return $start;
     }
     /**
@@ -320,7 +330,7 @@ class AttendanceController extends Controller
             }
             $attendances = $request->validated();
             // Log::info('Request Data:', $request->all());
-            $startTime = Carbon::createFromFormat('H:i', $this->startTime($classCode));
+            $startTime = $this->startTime($classCode);
             $currentTime = Carbon::now(); // Lay gio hien tai
             // $currentTime = Carbon::createFromFormat('H:i', '18:00'); // Fix cung gio hien tai
 
