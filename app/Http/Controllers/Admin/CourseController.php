@@ -32,10 +32,9 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        $first_year = $request->first_year;
-        $final_year = $request->final_year;
+        $first_year     = $request->first_year;
+        $final_year     = $request->final_year;
         $course_number  = $request->course_number;
-
 
         if (!is_numeric($first_year) || !is_numeric($final_year) || $first_year >= $final_year) {
             return response()->json(["message" => "Năm bắt đầu và kết thúc không hợp lệ."], 400);
@@ -72,21 +71,10 @@ class CourseController extends Controller
         $first_year = $request->first_year;
         $final_year = $request->final_year;
         $course_number = $request->course_number;
-        $sub_number = $request->sub_number;
 
-        // 1. Kiểm tra tính hợp lệ của năm học
-        if (!is_numeric($first_year) || !is_numeric($final_year) || $first_year >= $final_year) {
-            return response()->json(["message" => "Năm bắt đầu và kết thúc không hợp lệ."], 400);
-        }
-
-        // 2. Kiểm tra tính hợp lệ của số khóa và số đợt
-        if (!is_numeric($course_number) || !is_numeric($sub_number) || $course_number <= 0 || $sub_number <= 0) {
-            return response()->json(["message" => "Số khóa và đợt phải là số nguyên dương."], 400);
-        }
-
+        $cate_code = "K".$course_number;
+        $cate_name = "Khóa ".$course_number;
         // 3. Tạo mã và tên khóa học mới
-        $cate_code = "K" . $course_number . $sub_number;
-        $cate_name = "Khóa " . $course_number . " - Đợt " . $sub_number;
         $course_year = $first_year . '-' . $final_year;
 
         // 4. Kiểm tra trùng mã khóa học (ngoại trừ chính khóa học đang cập nhật)

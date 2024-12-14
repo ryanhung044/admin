@@ -32,7 +32,9 @@ class UpdateSubjectRequest extends FormRequest
             'description' => 'nullable',
             'semester_code' => 'required|exists:categories,cate_code',
             'major_code' => 'required|exists:categories,cate_code',
-            'is_active' => 'required|boolean'
+            'is_active' => 'required|boolean',
+            'assessments' => 'nullable|array',
+            'assessments.*' => 'string|exists:assessments,code', 
         ];
     }
 

@@ -1187,7 +1187,7 @@ class CategoryController extends Controller
             }
     
             // Tạo buổi học theo lịch 2-4-6 hoặc 3-5-7
-            while ($currentSession < $totalSessions) {
+            while ($currentSession < $totalSessions - 3) {
                 $key = $startDate->format('Y-m-d') . '-' . $item->class_code . '-' . ($item->room_code ?? '') . '-' . $item->session_code;
     
                 if (!isset($existingSchedules[$key])) {

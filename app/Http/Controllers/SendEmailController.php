@@ -89,9 +89,7 @@ class SendEmailController extends Controller
 
     public function sendMailLearnAgain(Request $request, $id)
     {
-        // return dd("ok");
         try {
-            // Kiểm tra service
             $service = Service::with('student')->find($id);
             if (!$service) {
                 return response()->json(['message' => 'Không tìm thấy dịch vụ.', 'data' => ''], 404);
@@ -113,7 +111,6 @@ class SendEmailController extends Controller
                 'email'        => $service->student->email ?? 'N/A',
                 'amount'       => $service->amount,
             ];
-
 
             Log::info('Email data:', $emailData);
 

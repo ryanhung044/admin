@@ -31,6 +31,23 @@ class SessionController extends Controller
         }
     }
 
+    public function show($cate_code)
+    {
+        try {
+            $model = $this->sessionRepository->getByCateCode($cate_code);
+            
+            if (!$model) {
+                return response()->json(['message' => 'Data not found'], 404);
+            }
+
+            return response()->json($model, 200);
+        } catch (NotFoundHttpException $e) {
+            return response()->json(['message' => $e->getMessage()], 404);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
+
     public function store(StoreSessionRequest $request){
         try{
             $timeStart = Carbon::parse($request->time_start);
@@ -43,17 +60,17 @@ class SessionController extends Controller
 
             $existingSessions = $this->sessionRepository->getAll();
 
-            foreach ($existingSessions as $session) {
-                // Tách chuỗi value thành start và end
-                $value = json_decode($session->value, true); // Giải mã JSON
-                $existingStart = Carbon::parse($value['start']);
-                $existingEnd = Carbon::parse($value['end']);
+            // foreach ($existingSessions as $session) {ss
+            //     // Tách chuỗi value thành start và end
+            //     $value = json_decode($session->value, true); // Giải mã JSON
+            //     $existingStart = Carbon::parse($value['start']);
+            //     $existingEnd = Carbon::parse($value['end']);
 
-                // Kiểm tra chồng chéo thời gian
-                if ($timeStart < $existingEnd && $timeEnd > $existingStart) {
-                    return response()->json(["message" => "Thời gian bị trùng với ca học khác."], 400);
-                }
-            }
+            //     // Kiểm tra chồng chéo thời gian
+            //     if ($timeStart < $existingEnd && $timeEnd > $existingStart) {
+            //         return response()->json(["message" => "Thời gian bị trùng với ca học khác."], 400);
+            //     }
+            // }
 
             $value = [
                 'start' => $request->time_start,
@@ -63,7 +80,7 @@ class SessionController extends Controller
             $value_json = json_encode($value);
 
 
-            $cate_code = "TS".$request->session;
+            $cate_code = "SS0".$request->session;
             $cate_name = "Ca ".$request->session;
             $value = $value_json;
             $data = [

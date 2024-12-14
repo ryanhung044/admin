@@ -73,9 +73,17 @@
             <td>{{ $data['amount'] }}</td>
         </tr>
     </table>
-    <a href="https://admin.feduvn.com/total_momo/learn-again?id={{$data['id']}}&user_code={{$data['user_code']}}">
-        Thanh toán ngay
+    <button class="btn btn-button">
+        <a  href="http://127.0.0.1:8000/total_momo/service?id={{$data['id']}}&user_code={{$data['user_code']}}">
+        Thanh toán MOMO
+        </a>
+    </button>
+
+
+    <a href="http://127.0.0.1:8000/total_vnpay/service?id={{$data['id']}}&user_code={{$data['user_code']}}">
+        Thanh toán VNPAY
     </a>
+
     <p class="note">Sinh viên có thắc mắc hoặc cần hỗ trợ thêm thông tin vui lòng liên hệ theo thông tin dưới đây trong
         giờ hành chính:</p>
     <ul>

@@ -2,6 +2,7 @@
 use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CheckoutLearnAgainController;
+use App\Http\Controllers\CheckoutServiceController;
 use App\Http\Controllers\FeeController;
 
 use App\Http\Controllers\Admin\UserController;
@@ -55,19 +56,23 @@ Route::post('/reset-password',[ForgetPasswordController::class, 'resetPasswordPo
                                             ->name('reset.password.post');
 
 
-Route::get('total_momo/learn-again', [CheckoutLearnAgainController::class, 'momo_payment']);
+Route::get('total_momo/learn-again',    [CheckoutLearnAgainController::class, 'momo_payment']);
+Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
+
+Route::get('payment-callback/service', [CheckoutServiceController::class, 'handleCallback']);
+Route::get('payment-success/service', [CheckoutServiceController::class, 'PaymentSuccess']);
+
 
 Route::post('/payment-callback/learn-again', [CheckoutLearnAgainController::class, 'handleCallback']);
 Route::get('/payment-success/learn-again', [CheckoutLearnAgainController::class, 'handleCallback']);
+
 Route::post('/send-email/learn-again/{id}/{subject_code}',  [SendEmailController::class, 'sendMailLearnAgain']);
 
-
-
-
-Route::post('total_vnpay', [CheckoutController::class, 'vnpay_payment'])->name('total_vnpay');
+Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment']);
 
 Route::get('button_payment', function(){
     return view('test');
 });
 
 Route::get('return-vnpay', [CheckoutController::class, 'vnpay_payment_return']);
+Route::get('return-vnpay/service', [CheckoutServiceController::class, 'vnpay_payment_return']);

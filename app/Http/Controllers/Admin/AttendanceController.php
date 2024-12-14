@@ -30,7 +30,7 @@ class AttendanceController extends Controller
         Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
 
         return response()->json([
-            'message' => 'Lỗi không xác định!'
+            'message' => 'Lỗi không xác định!' . $th->getMessage()
         ], 500);
     }
     /**
@@ -138,31 +138,51 @@ class AttendanceController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateAttendanceRequest $request, string $classCode)
-    {
-        DB::beginTransaction();
-        try {
-            $attendances = $request->validated();
-            // Kiểm tra nếu dữ liệu là mảng và có dữ liệu
-            if (is_array($attendances) && count($attendances) > 0) {
-                foreach ($attendances as $atd) {
-                    $noted = $atd['noted'] ??  "";
-                    Attendance::where('student_code', $atd['student_code'])->where('class_code', $atd['class_code'])->whereDate('date', '=', $currentTime)
-                        ->update([
-                            'student_code' => $atd['student_code'],
-                            'class_code' => $atd['class_code'],
-                            'date' => Carbon::now(),
-                            'status' => $atd['status'],
-                            'noted' => $noted,
-                        ]);
-                }
+{
+    DB::beginTransaction();
+    try {
+        $attendances = $request->validated();
 
-                return response()->json($attendances, 200);
-            }
-        } catch (Throwable $th) {
-
-            return $this->handleErrorNotDefine($th);
+        // Kiểm tra nếu dữ liệu hợp lệ
+        if (empty($attendances) || !is_array($attendances)) {
+            return response()->json(['error' => 'No attendance data provided or invalid format.'], 400);
         }
+
+        foreach ($attendances as $atd) {
+            $noted = $atd['noted'] ?? "";
+
+            // Sử dụng updateOrInsert để tối ưu hóa
+            Attendance::updateOrInsert(
+                [
+                    'student_code' => $atd['student_code'],
+                    'class_code' => $classCode,
+                    'date' => $atd['date'],
+                ],
+                [
+                    'status' => $atd['status'],
+                    'noted' => $noted,
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Attendance updated successfully.',
+            'data' => $attendances,
+        ], 200);
+    } catch (Throwable $th) {
+        DB::rollBack();
+
+        // Trả về thông báo lỗi chi tiết
+        return response()->json([
+            'error' => 'Failed to update attendance.',
+            'message' => $th->getMessage(),
+        ], 500);
     }
+}
+
 
     /**
      * Remove the specified resource from storage.

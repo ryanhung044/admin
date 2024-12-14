@@ -34,43 +34,73 @@ class SubjectController extends Controller
     {
         try {
             $perPage = $request->input('per_page', 10);
-            $subjects = Subject::select('subject_code', 'subject_name', 'major_code', 'is_active')->with([
-                'major' => function($query){
-                    $query->select('cate_code', 'cate_name');
-                }
-            ])->paginate($perPage);
+            $search = $request->input('search'); // Lấy từ khóa tìm kiếm từ request
+
+            $subjects = Subject::select('subject_code', 'subject_name', 'major_code', 'is_active')
+                ->with([
+                    'major' => function ($query) {
+                        $query->select('cate_code', 'cate_name');
+                    }
+                ])
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('subject_code', 'like', "%{$search}%")
+                        ->orWhere('subject_name', 'like', "%{$search}%")
+                        ->orWhere('major_code', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate($perPage);
+
             return response()->json([
-                'status' => true, 
+                'status' => true,
                 'subjects' => $subjects
             ], 200);
         } catch (\Throwable $th) {
             return $this->handleErrorNotDefine($th);
         }
-    }
+    }   
 
     public function store(StoreSubjectRequest $request)
     {
         try {
+            // Lấy mã môn học mới nhất và tạo subject_code mới
             $newestSubjectCode = Subject::withTrashed()
                 ->where('major_code', 'LIKE', $request['major_code'])
                 ->selectRaw("MAX(CAST(SUBSTRING(subject_code, 4) AS UNSIGNED)) as max_number")
                 ->value('max_number');
             $nextNumber = $newestSubjectCode ? $newestSubjectCode + 1 : 1;
 
-            // Tạo mã subject_code mới với phần tiền tố (ở đây là mã chuyên ngành từ request)
             $newSubjectCode = $request['major_code'] . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
-
-            // Gán giá trị subject_code mới vào request
             $request['subject_code'] = $newSubjectCode;
 
-            // Tạo bản ghi mới
+            // Tạo bản ghi mới trong bảng subjects
             $subject = $this->subjectRepository->create($request);
+
+            // Lấy danh sách assessment_items từ request
+            $assessmentItems = $request['assessment_items'];
+
+            // Thêm các đầu điểm vào bảng subject_assessment
+            $subjectAssessments = [];
+            foreach ($assessmentItems as $assessmentCode) {
+                $subjectAssessments[] = [
+                    'subject_code' => $newSubjectCode,
+                    'assessment_code' => $assessmentCode,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            return $subjectAssessments;
+            // Chèn vào bảng subject_assessment
+            if (!empty($subjectAssessments)) {
+                DB::table('subject_assessment')->insert($subjectAssessments);
+            }
 
             return response()->json(['message' => 'Thêm mới thành công'], 201);
         } catch (\Throwable $th) {
             return response()->json(['message' => $th->getMessage()], 400);
         }
     }
+
 
 
     public function show(string $subject_code)

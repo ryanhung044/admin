@@ -83,7 +83,30 @@ Route::controller(TeacherClassroomController::class)->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     // Lấy thông tin tài khoản đang đăng  nhập
     Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
+        try{
+        $user = User::with([
+        'course' => function($query){
+        $query->select('cate_code', 'cate_name', 'value');
+        }
+        , 'semester' => function($query){
+        $query->select('cate_code', 'cate_name');
+        }
+        ,'major' => function($query){
+        $query->select('cate_code', 'cate_name');
+        }, 
+        'narrow_major' => function($query){
+        $query->select('cate_code', 'cate_name');
+        }
+        ])->where('user_code', $request->user()->user_code)
+        ->first();
+
+        return response()->json($user);
+    } catch(\Throwable $th){
+        return response()->json([
+            'status' => false,
+            'message' => 'Có lỗi không xác định'
+        ],500);
+    }
     });
     // Đăng xuất
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -282,7 +305,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
         // dịch vụ cung cấp bảng điểm
-
+        Route::post('services/register/dang-ky-cap-bang-diem',      [ServiceController::class, 'provideScoreboard']);
         // dịch vụ thay đổi thông tin
         Route::post('services/register/dang-ky-thay-doi-thong-tin', [ServiceController::class, 'ChangeInfo']);
         Route::get('services',      [ServiceController::class, 'getAllServicesByStudent']);
@@ -326,15 +349,10 @@ Route::post('services/change-major/{user_code}',            [ServiceController::
 // cung cấp thẻ sinh viên
 Route::post('services/register/dang-ky-cap-lai-the',        [ServiceController::class, 'provideStudentCard']);
 
-Route::post('services/register/dang-ky-cap-bang-diem',      [ServiceController::class, 'provideScoreboard']);
-
 Route::apiResource('fees', FeeController::class);
 Route::get('momo-payment', [CheckoutController::class, 'momo_payment']);
 Route::get('total_momo/learn-again', [CheckoutLearnAgainController::class, 'momo_payment']);
-
 Route::post('/forgot-password', [ForgetPasswordController::class, 'forgetPasswordPost']);
-
-
 Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost']);
 
 

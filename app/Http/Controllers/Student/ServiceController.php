@@ -103,7 +103,10 @@ class ServiceController extends Controller
   public function getListLearnAgain(Request $request)
   {
     $user_code = request()->user()->user_code;
-    $subject = Score::Where('is_pass', false)->where('status', false)->where('student_code', $user_code)->with('Subject')->get();
+    $subject = Score::Where('is_pass', false)
+                    ->where('status', false)
+                    ->where('student_code', $user_code)
+                    ->with('Subject')->get();
     return response()->json(['data' => $subject], 200);
   }
 
@@ -124,21 +127,21 @@ class ServiceController extends Controller
       ];
 
       $service = Service::create($data);
-      // if ($service) {
-      // Xây dựng URL cho API gửi email
-      // $redirectUrl = url("/send-email/learn-again/{$service->id}");
+      if ($service) {
 
-      // // Gọi API gửi email
-      // $response = Http::post($redirectUrl, [
-      //     'subject_code' => $subject_code,  // Gửi danh sách user_code
-      // ]);
+      $redirectUrl = url("/send-email/learn-again/{$service->id}");
 
-      // if ($response->successful()) {
-      //     return response()->json(['message' => 'Gửi dịch vụ thành công và email đã được gửi', 'service' => $service]);
-      // } else {
-      //     return response()->json(['message' => 'Gửi dịch vụ thành công nhưng không thể gửi email', 'service' => $service]);
-      // }
-      // }
+      // Gọi API gửi email
+      $response = Http::post($redirectUrl, [
+          'subject_code' => $subject_code,  // Gửi danh sách user_code
+      ]);
+
+      if ($response->successful()) {
+          return response()->json(['message' => 'Gửi dịch vụ thành công và email đã được gửi', 'service' => $service]);
+      } else {
+          return response()->json(['message' => 'Gửi dịch vụ thành công nhưng không thể gửi email', 'service' => $service]);
+      }
+      }
       return response()->json(['message' => 'gửi dịch vụ thành công', 'service' => $service]);
     } catch (\Throwable $th) {
       return response()->json(['message' => $th->getMessage()]);
@@ -240,12 +243,13 @@ class ServiceController extends Controller
         'number_board'     => 'required|integer|min:1',
         'number_phone'     => 'required|string|max:15',
         'receive_method'   => 'required|string',
+        'amount'           => 'required',
         'receive_address'  => 'nullable|string|max:255',
         'note'             => 'nullable|string|max:500',
       ]);
 
-    //   $user_code = $request->user()->user_code;
-        $user_code = $request->user_code;
+      $user_code = $request->user()->user_code;
+        // $user_code = $request->user_code;
       if (!$user_code) {
         return response()->json(['message' => 'không tìm thấy user_code']);
       }
@@ -263,7 +267,7 @@ class ServiceController extends Controller
       }
 
       $service_name = "Đăng ký cấp bảng điểm";
-      $amount = $validatedData['number_board'] * 100000;
+      $amount = $validatedData['amount'];
       $data = [
         'user_code'     => $user_code,
         'service_name'  => $service_name,
@@ -295,7 +299,6 @@ class ServiceController extends Controller
   public function changeInfo(Request $request)
   {
     try {
-
       $validatedData = $request->validate([
         'full_name'     => 'nullable|string|max:255',
         'sex'           => 'nullable|string|in:Nam,Nữ',  // Giới tính, chỉ có 2 giá trị
@@ -311,8 +314,6 @@ class ServiceController extends Controller
       }
 
       $service_name = "Đăng kí thay đổi thông tin";
-
-
       $content = "";
 
       if (!empty($validatedData['full_name'])) {
