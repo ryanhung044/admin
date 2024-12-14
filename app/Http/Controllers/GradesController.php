@@ -224,9 +224,11 @@ class GradesController extends Controller
                             'score' => $matchedScore->score ?? 0 // Điểm mặc định là 0 nếu không có
                         ];
                     });
+                    $sortedScores = $scores->sortByAsc('weight')->values();
                     $diem = 0;
                     $heSo = 0;
-                    foreach ($scores as $scoreEntry) {
+
+                    foreach ($sortedScores as $scoreEntry) {
                         $diem += $scoreEntry['score'] * $scoreEntry['weight'];
                         $heSo += $scoreEntry['weight'];
                     }
@@ -237,7 +239,7 @@ class GradesController extends Controller
                         'student_code' => $student->user_code,
                         'student_name' => $student->full_name,
                         'average_score' => $formattedScore,
-                        'scores' => $scores
+                        'scores' => $sortedScores
                     ];
                 });
             
