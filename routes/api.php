@@ -209,7 +209,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('semesters', SemesterController::class);
         Route::apiResource('grades', GradesController::class);
         Route::get('grades', [GradesController::class, 'getByParam']);
-        Route::patch('grades/{id}', [GradesController::class, 'update']);
+        Route::put('grades/{id}', [GradesController::class, 'update']);
         Route::apiResource('schoolrooms', SchoolRoomController::class);
         Route::put('/schoolrooms/bulk-update-type', [SchoolRoomController::class, 'bulkUpdateType']);
         Route::post('updateActive/{id}', [CategoryController::class, 'updateActive']);
