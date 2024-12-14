@@ -224,7 +224,7 @@ class GradesController extends Controller
                             'score' => $matchedScore->score ?? 0 // Điểm mặc định là 0 nếu không có
                         ];
                     });
-                    $sortedScores = $scores->sortByAsc('weight')->values();
+                    $sortedScores = $scores->sortBy('weight')->values();
                     $diem = 0;
                     $heSo = 0;
 
