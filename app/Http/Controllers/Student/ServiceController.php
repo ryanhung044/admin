@@ -248,8 +248,8 @@ class ServiceController extends Controller
         'note'             => 'nullable|string|max:500',
       ]);
 
-      $user_code = $request->user()->user_code;
-        // $user_code = $request->user_code;
+      $user_code = request()->user()->user_code;
+      // $user_code = $request->user_code;
       if (!$user_code) {
         return response()->json(['message' => 'không tìm thấy user_code']);
       }
@@ -385,23 +385,24 @@ class ServiceController extends Controller
     }
   }
 
-  public function cancelServiceByStudent(int $id){
-        try{
-            $service = Service::find($id);
-            if(!$service){
-                return response()->json(['message' => 'không tìm thấy dịch vụ']);
-            }
+  public function cancelServiceByStudent(int $id)
+  {
+    try {
+      $service = Service::find($id);
+      if (!$service) {
+        return response()->json(['message' => 'không tìm thấy dịch vụ']);
+      }
 
-            $status = $service->status;
-            if($status != "pending"){
-                return response()->json(['message' => 'dịch vụ đã được chấp nhận hoặc bị hủy, không thể hủy dịch vụ']);
-            }
+      $status = $service->status;
+      if ($status != "pending") {
+        return response()->json(['message' => 'dịch vụ đã được chấp nhận hoặc bị hủy, không thể hủy dịch vụ']);
+      }
 
-            $service->delete();
-            return response()->json(['message' => 'hủy dịch vụ thành công']);
-        }catch(\Throwable $th){
-            Log::error('Cancel Service Error: ' . $th->getMessage());
-            return response()->json(['message' => $th->getMessage()]);
-        }
+      $service->delete();
+      return response()->json(['message' => 'hủy dịch vụ thành công']);
+    } catch (\Throwable $th) {
+      Log::error('Cancel Service Error: ' . $th->getMessage());
+      return response()->json(['message' => $th->getMessage()]);
+    }
   }
 }
