@@ -195,9 +195,9 @@ class GradesController extends Controller
                             'scorecomponents' => function ($query) use ($classCode) {
                                 $query->where('class_code', $classCode)
                                     ->with('assessmentItem', function ($query) {
-                                            $query->select('assessment_code', 'name', 'weight');
+                                            $query->select('assessment_code', 'name', 'weight')->orderBy('weight','asc');
                                     })
-                                    ->select('student_code', 'class_code', 'score', 'assessment_code')->orderBy('weight','asc');
+                                    ->select('student_code', 'class_code', 'score', 'assessment_code');
                             }
 
                         ])
