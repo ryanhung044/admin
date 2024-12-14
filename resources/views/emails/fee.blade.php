@@ -64,7 +64,7 @@
             <th>Số tiền (VNĐ)</th>
         </tr>
         <tr>
-            <td>Học phí phải nộp bao gồm học phí Tiếng Anh (đã trừ số dư Ví Học phí, ưu đãi, miễn giảm,...)</td>
+            <td>Học phí phải nộp </td>
             <td>{{ number_format($data['amount'], 0, ',', '.') }} VND</td>
         </tr>
     </table>
@@ -79,7 +79,7 @@
 
     <p><strong>5. Hình thức nộp tiền:</strong> Sinh viên truy cập hệ thống để
         {{-- <a href="https://admin.feduvn.com/total_momo?fee_id={{ $data['id'] }}">dng.fpt.edu.vn</a> để xem hướng dẫn nộp tiền.  --}}
-        <a href="https://admin.feduvn.com/total_momo?fee_id={{ $data['id'] }}">Thanh toán ngay</a>
+        <a href="https://admin.feduvn.com/api/momo-payment?fee_id={{ $data['id'] }}">Thanh toán ngay</a>
     </p>
 
     <h2>Hướng dẫn tra cứu học phí đã nộp</h2>

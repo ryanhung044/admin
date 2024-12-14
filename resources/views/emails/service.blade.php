@@ -55,25 +55,21 @@
     <p>Trường Cao đẳng F-Education - Cơ sở Hà Nội gửi đến bạn thông
         tin dịch vụ đã đăng kí</p>
 
-    <h2>Thông tin học phí</h2>
+    <h2>Thông tin dịch vụ</h2>
 
     <table>
         <tr>
             <th>Tên dịch vụ</th>
             <th>Nội dung</th>
-            <th>Trạng thái</th>
-            <th>Lí do</th>
             <th>Phí dịch vụ</th>
         </tr>
         <tr>
             <td> {{$data['service_name'] }}</td>
             <td>{{ $data['content'] }}</td>
-            <td>  {{ $data['status'] }}  </td>
-            <td></td>
-            <td>{{ $data['amount'] }}</td>
+            <td>{{ number_format($data['amount'], 0, ',', '.') }}</td>
         </tr>
     </table>
-    <a href="https://admin.feduvn.com/total_momo/learn-again?id={{$data['id']}}&user_code={{$data['user_code']}}&subject_code={{$data['subject_code']}}">
+    <a href="https://admin.feduvn.com/api/total_momo/learn-again?id={{$data['id']}}&user_code={{$data['user_code']}}&subject_code={{$data['subject_code']}}">
         Thanh toán ngay
     </a>
     <p class="note">Sinh viên có thắc mắc hoặc cần hỗ trợ thêm thông tin vui lòng liên hệ theo thông tin dưới đây trong
