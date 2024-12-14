@@ -197,7 +197,7 @@ class GradesController extends Controller
                                     ->with('assessmentItem', function ($query) {
                                             $query->select('assessment_code', 'name', 'weight');
                                     })
-                                    ->select('student_code', 'class_code', 'score', 'assessment_code');
+                                    ->select('student_code', 'class_code', 'score', 'assessment_code')->orderBy('weight','asc');
                             }
 
                         ])
