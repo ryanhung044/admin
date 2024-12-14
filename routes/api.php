@@ -360,12 +360,18 @@ Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordP
 Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment']);
 Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
 
+Route::get('return-vnpay', [CheckoutController::class, 'vnpay_payment_return']);
 
 
 
+Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
 
 
-
-
+// api dẫn đến trang thanh toán vnpay của dịch vụ
+Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment'])
+    ->name('total_vnpay_service');
+Route::get('return-vnpay/service', [CheckoutServiceController::class, 'vnpay_payment_return']);
+Route::get('failed-vnpay', [CheckoutServiceController::class, 'vnpay_payment_fail'])->name('payment.failed');
+Route::get('success-vnpay', [CheckoutServiceController::class, 'vnpay_payment_success'])->name('payment.success');
 
 

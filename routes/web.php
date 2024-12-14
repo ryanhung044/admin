@@ -38,7 +38,6 @@ Route::post('/renderScheduleForClassroom', [ClassRoomController::class, 'renderS
 // Route::get('total_momo', [CheckoutController::class, 'momo_payment']);
 
 
-
 Route::post('/payment-callback', [CheckoutController::class, 'handleCallback']);
 Route::get('/payment-success', [CheckoutController::class, 'handleCallback']);
 
@@ -56,8 +55,10 @@ Route::post('/reset-password',[ForgetPasswordController::class, 'resetPasswordPo
                                             ->name('reset.password.post');
 
 
+
 // Route::get('total_momo/learn-again',    [CheckoutLearnAgainController::class, 'momo_payment']);
 // Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
+
 
 Route::get('payment-callback/service', [CheckoutServiceController::class, 'handleCallback']);
 Route::get('payment-success/service', [CheckoutServiceController::class, 'PaymentSuccess']);
@@ -68,11 +69,16 @@ Route::get('/payment-success/learn-again', [CheckoutLearnAgainController::class,
 
 Route::post('/send-email/learn-again/{id}/{subject_code}',  [SendEmailController::class, 'sendMailLearnAgain']);
 
+
 // Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment']);
+
 
 // Route::get('button_payment', function(){
 //     return view('test');
 // });
 
-Route::get('return-vnpay', [CheckoutController::class, 'vnpay_payment_return']);
-Route::get('return-vnpay/service', [CheckoutServiceController::class, 'vnpay_payment_return']);
+// Route::get('return-vnpay', [CheckoutServiceController::class, 'vnpay_payment_return']);
+
+// Route::get('failed-vnpay', [CheckoutServiceController::class, 'vnpay_payment_fail'])->name('payment.failed');
+// Route::get('success-vnpay', [CheckoutServiceController::class, 'vnpay_payment_success'])->name('payment.success');
+

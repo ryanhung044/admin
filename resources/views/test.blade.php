@@ -38,7 +38,7 @@
     </style>
 </head>
 <body>
-    <form action="{{ route('total_vnpay') }}" method="POST">
+    <form action="http://127.0.0.1:8000/api/total_vnpay/service" method="GET">
         @csrf
         <h2>Thanh toán VNPay</h2>
         <p>Nhấn nút bên dưới để tiến hành thanh toán.</p>

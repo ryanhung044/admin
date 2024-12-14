@@ -94,15 +94,30 @@ class NewsletterController extends Controller
         try {
             $params = $request->except('_token');
 
+            // Xử lý ảnh nếu có
             if ($request->hasFile('image')) {
                 $fileName = $request->file('image')->store('uploads/image', 'public');
             } else {
                 $fileName = null;
             }
-
+    
             $params['image'] = $fileName;
-            Newsletter::create($params);
+    
+            $categoryCode = $params['cate_code'];
+    
+            $lastPost = Newsletter::where('cate_code', $categoryCode)
+                ->orderBy('id', 'desc')
+                ->first();
+    
+            // Lấy số thứ tự tăng dần từ bài viết cuối cùng
+            $lastIndex = $lastPost ? intval(substr($lastPost->code, strlen($categoryCode))) : 0;
+            $newIndex = $lastIndex + 1;
+    
+            // Tạo mã bài viết mới
+            $params['code'] = $categoryCode . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
 
+            Newsletter::create($params);
+    
             return response()->json($params, 200);
         } catch (\Throwable $th) {
 

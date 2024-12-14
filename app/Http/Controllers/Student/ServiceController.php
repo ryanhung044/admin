@@ -301,10 +301,10 @@ class ServiceController extends Controller
     try {
       $validatedData = $request->validate([
         'full_name'     => 'nullable|string|max:255',
-        'sex'           => 'nullable|string|in:Nam,Nữ',  // Giới tính, chỉ có 2 giá trị
-        'date_of_birth' => 'nullable|date', // Kiểm tra định dạng ngày tháng
-        'address'       => 'nullable|string|max:255', // Địa chỉ
-        'id_number'     => 'nullable|string|max:20', // Kiểm tra CMT/CCCD
+        'sex'           => 'nullable|string|in:Nam,Nữ',
+        'date_of_birth' => 'nullable|date',
+        'address'       => 'nullable|string|max:255',
+        'id_number'     => 'nullable|string|max:20',
         'note'          => 'nullable|string|max:500',
       ]);
 
@@ -404,5 +404,16 @@ class ServiceController extends Controller
       Log::error('Cancel Service Error: ' . $th->getMessage());
       return response()->json(['message' => $th->getMessage()]);
     }
+  }
+
+  public function StudentsInfoOld(){
+        try{
+            $user_code = request()->user()->user_code;
+            $student = User::where('user_code', $user_code);
+            return response()->json([]);
+
+        }catch(\Throwable $th){
+            return response()->json(['message' => $th->getMessage()]);
+        }
   }
 }

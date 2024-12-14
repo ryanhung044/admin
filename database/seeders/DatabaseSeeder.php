@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -17,12 +18,11 @@ class DatabaseSeeder extends Seeder
 
         // \App\Models\User::factory(50)->create();
 
-
         User::create([
             'user_code' => 'AM' . fake()->unique()->numberBetween(100, 999), // Tạo mã sinh viên ngẫu nhiên ST100 - ST999
             'full_name' => fake()->name,
-            'email' => 'admin1@gmail.com',
-            'password' => '123456', // Mật khẩu mẫu
+            'email' => 'student@gmail.com',
+            'password' => '123456',
             'phone_number' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'sex' => fake()->randomElement(['male', 'female']),
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             'place_of_grant' => fake()->city,
             'nation' => 'Kinh',
             'avatar' => fake()->imageUrl(200, 200, 'people'), // URL avatar ngẫu nhiên
-            'role' => '0',
+            'role' => '3',
         ]);
         // User::create([
         //     'user_code' => 'TC' . fake()->unique()->numberBetween(100, 999),

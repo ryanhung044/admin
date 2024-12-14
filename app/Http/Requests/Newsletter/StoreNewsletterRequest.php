@@ -24,7 +24,7 @@ class StoreNewsletterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|regex:/^[^<>{}]*$/|unique:newsletters,code',
+            'code' => 'regex:/^[^<>{}]*$/|unique:newsletters,code',
             'title' => 'required|max:255|regex:/^[^<>{}]*$/',
             // 'tags' => 'regex:/^[^<>{}]*$/',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
@@ -41,7 +41,7 @@ class StoreNewsletterRequest extends FormRequest
     public function messages()
     {
         return [
-            'code.required' => 'Bạn chưa nhập mã bản tin',
+            // 'code.required' => 'Bạn chưa nhập mã bản tin',
             'code.regex' => 'Mã bản tin không chứa kí tự đặc biệt',
             'code.unique' => 'Mã bản tin đã được sử dụng',
             'title.required' => 'Bạn chưa nhập Title bản tin',
