@@ -356,7 +356,7 @@ class AttendanceController extends Controller
 
                 return response()->json([
                     'message' => 'Đã quá 15 phút',
-                ]);
+                ], 500);
             }
         } catch (Throwable $th) {
 

@@ -11,6 +11,7 @@ use App\Models\Classroom;
 use App\Models\Schedule;
 use App\Models\TransferScheduleHistory;
 use App\Models\TransferScheduleTimeframe;
+use DateInterval;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,11 +50,20 @@ class ScheduleController extends Controller
     public function index(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 10);
+            $perPage = $request->input('per_page', 7);
 
             $student_code = request()->user()->user_code;
 
-            $today = now()->format('Y-m-d');
+            $today = now();
+
+            $dates_want_response = [];
+
+            for($i = 0 ; $i < 7; $i++){
+                $today->add(new DateInterval('P1D'));
+                $dates_want_response[] = $today->format('Y-m-d');
+            }
+
+
             $classroom_codes = ClassroomUser::where('user_code', $student_code)->pluck('class_code');
             if (!$classroom_codes) {
                 return response()->json([
@@ -68,7 +78,8 @@ class ScheduleController extends Controller
                 'session',
                 'classroom'
             ])->whereIn('class_code', $classroom_codes)
-                ->where('date', '>=', $today)
+            ->whereIn('date', $dates_want_response)
+                // ->where('date', '>=', $today)
                 ->orderBy('date', 'asc')
                 ->paginate($perPage)->map(function ($schedule) {
                     // $session_info = optional($schedule->session);
@@ -245,6 +256,7 @@ class ScheduleController extends Controller
                     'subjects.major_code'
                 )
                 ->first();
+
                 
 
                 $classroom_others_studying = Classroom::with([

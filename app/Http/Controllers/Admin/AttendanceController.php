@@ -146,7 +146,7 @@ class AttendanceController extends Controller
 
             // Kiểm tra nếu dữ liệu hợp lệ
             if (empty($attendances) || !is_array($attendances)) {
-                return response()->json(['error' => 'No attendance data provided or invalid format.'], 400);
+                return response()->json(['error' => 'Không có attendent nào.'], 400);
             }
 
             foreach ($attendances as $atd) {
@@ -170,7 +170,7 @@ class AttendanceController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Attendance updated successfully.',
+                'message' => 'Update thành công.',
                 'data' => $attendances,
             ], 200);
         } catch (Throwable $th) {
@@ -178,7 +178,7 @@ class AttendanceController extends Controller
 
             // Trả về thông báo lỗi chi tiết
             return response()->json([
-                'error' => 'Failed to update attendance.',
+                'error' => 'Lỗi không xác định.',
                 'message' => $th->getMessage(),
             ], 500);
         }

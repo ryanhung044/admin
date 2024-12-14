@@ -218,6 +218,7 @@ class GradesController extends Controller
                                         $score->student_code === $student->user_code;
                             });
                         return [
+                            'assessment_code' => $matchedScore->assessmentItem->assessment_code ?? $assessment->assessment_code,
                             'assessment_name' => $matchedScore->assessmentItem->name ?? $assessment->name,
                             'weight' => $matchedScore->assessmentItem->weight ?? $assessment->weight,
                             'score' => $matchedScore->score ?? 0 // Điểm mặc định là 0 nếu không có
