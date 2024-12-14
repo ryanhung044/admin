@@ -33,6 +33,7 @@ use App\Http\Controllers\Teacher\ScheduleController as TeacherScheduleController
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CheckoutServiceController;
 use App\Http\Controllers\Teacher\ScheduleController;
 use App\Http\Controllers\Teacher\ClassroomController as TeacherClassroomController;
 use App\Http\Controllers\Teacher\AttendanceController as TeacherAttendanceController;
@@ -356,7 +357,8 @@ Route::get('momo-payment', [CheckoutController::class, 'momo_payment']);
 Route::get('total_momo/learn-again', [CheckoutLearnAgainController::class, 'momo_payment']);
 Route::post('/forgot-password', [ForgetPasswordController::class, 'forgetPasswordPost']);
 Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost']);
-
+Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment']);
+Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
 
 
 
