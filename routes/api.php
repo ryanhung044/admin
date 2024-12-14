@@ -185,6 +185,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('pointheads', PointHeadController::class);
         // Route::apiResource('newsletters', NewsletterController::class);
         Route::apiResource('attendances', AttendanceController::class);
+        Route::put('/attendances/{class_code}', [AttendanceController::class, 'update']);
+
         Route::apiResource('categoryNewsletters', CategoryNewsletter::class);
         Route::get('/majors/{major_code}/teachers', [MajorController::class, 'renderTeachersAvailable']);
         Route::put('/major/bulk-update-type', [MajorController::class, 'bulkUpdateType']);
@@ -214,7 +216,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('pointheads', PointHeadController::class);
         Route::put('/pointheads/bulk-update-type', [PointHeadController::class, 'bulkUpdateType']);
         // Route::apiResource('newsletters', NewsletterController::class);
-        Route::apiResource('attendances', AttendanceController::class);
+        // Route::apiResource('attendances', AttendanceController::class);
         Route::apiResource('categoryNewsletters', CategoryNewsletter::class);
         Route::put('/newsletter/bulk-update-type', [CategoryNewsletter::class, 'bulkUpdateType']);
         Route::apiResource('fees', FeeController::class);

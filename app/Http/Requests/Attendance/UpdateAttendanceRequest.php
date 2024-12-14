@@ -25,7 +25,7 @@ class UpdateAttendanceRequest extends FormRequest
     {
         return [
             '*.student_code' => 'required',
-            '*.class_code' => 'required',
+            '*.class_code' => 'nullable',
             '*.status' => 'required',
             '*.noted' => 'nullable|regex:/^[^<>{}]*$/',
             '*.date' => 'nullable',
@@ -35,7 +35,7 @@ class UpdateAttendanceRequest extends FormRequest
     public function messages(){
         return [
             'student_code.required' => 'Mã học sinh không được bỏ trống',
-            'class_code.required' => 'Mã lớp không được bỏ trống',
+            // 'class_code.required' => 'Mã lớp không được bỏ trống',
             'note.regex' => 'Ghi chú không chứa ký tự <> {}'
         ];
     }

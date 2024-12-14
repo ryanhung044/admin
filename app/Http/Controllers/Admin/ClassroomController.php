@@ -185,7 +185,7 @@ class ClassroomController extends Controller
                 }
                 // Tăng ngày hiện tại lên 1 ngày
 
-                if (count($study_dates) == $subject['total_sessions']) {
+                if (count($study_dates) == $subject['total_sessions'] - 3) {
                     $exam_days = 0;
                     $curentDate->add(new DateInterval('P7D'));
                     while ($exam_days < $total_exam_sessions) {
