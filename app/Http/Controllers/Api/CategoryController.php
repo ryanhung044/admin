@@ -924,7 +924,8 @@ class CategoryController extends Controller
             ->where('subjects.is_active', true)
             ->leftJoin('users as major_users', function ($join) {
                 $join->on('categories.cate_code', '=', 'major_users.major_code')
-                    ->orOn('categories.cate_code', '=', 'major_users.narrow_major_code');
+                    ->orOn('categories.cate_code', '=', 'major_users.narrow_major_code')
+                    ->orWhere('categories.cate_code', 'LIKE', 'ALL%');
             })
             ->leftJoin('fees', 'major_users.user_code', '=', 'fees.user_code')
             ->where('major_users.is_active', true)
@@ -934,8 +935,11 @@ class CategoryController extends Controller
                 'categories.cate_name',
                 'subjects.subject_code',
                 'subjects.subject_name',
+                'subjects.major_code as subject_major_code',
                 'subjects.semester_code as subject_semester_code',
                 'major_users.user_code as major_user_code',
+                'major_users.major_code as major_code',
+                'major_users.narrow_major_code as narrow_major_code',
                 'major_users.full_name as major_user_name',
                 'major_users.semester_code as major_semester_code',
                 'major_users.role as user_role',
@@ -951,7 +955,8 @@ class CategoryController extends Controller
                     'subjects' => $subjects->groupBy('subject_code')->map(function ($users, $subject_code) use ($studentRelearnsGrouped) {
                         $students = collect();
                         $teachers = collect();
-
+                        $subjectIsForAll = substr($users->first()->subject_code, 0, 3) === 'ALL';
+                        // return $users;
                         foreach ($users as $user) {
                             if ($user->user_role == "3" && $user->fee_status === "paid" && $user->semester_code === $user->subject_semester_code && $user->major_semester_code === $user->subject_semester_code) {
                                 $students->push([
@@ -960,12 +965,20 @@ class CategoryController extends Controller
                                     'semester' => $user->major_semester_code,
                                 ]);
                             }
-
-                            if ($user->user_role == "2") {
-                                $teachers->push([
-                                    'user_code' => $user->major_user_code,
-                                    'user_name' => $user->major_user_name,
-                                ]);
+                            if ($subjectIsForAll) {
+                                if ($user->user_role == "2" && ($user->major_code == $user->subject_major_code || $user->narrow_major_code == $user->subject_major_code)) {
+                                    $teachers->push([
+                                        'user_code' => $user->major_user_code,
+                                        'user_name' => $user->major_user_name,
+                                    ]);
+                                }
+                            } else {
+                                if ($user->user_role == "2") {
+                                    $teachers->push([
+                                        'user_code' => $user->major_user_code,
+                                        'user_name' => $user->major_user_name,
+                                    ]);
+                                }
                             }
                         }
 
@@ -1155,41 +1168,41 @@ class CategoryController extends Controller
                 'subjects.total_sessions'
             )
             ->get();
-    
+
         if ($data->isEmpty()) {
             return response()->json([
                 'message' => 'No schedules found for today!'
             ], 404);
         }
-    
+
         $existingSchedules = DB::table('schedules')
             ->select('date', 'class_code', 'room_code', 'session_code')
             ->get()
             ->keyBy(function ($item) {
                 return $item->date . '-' . $item->class_code . '-' . $item->room_code . '-' . $item->session_code;
             });
-    
+
         $createdDates = [];
         $insertData = [];
-    
+
         foreach ($data as $item) {
             $startDate = Carbon::parse($item->date);
             $totalSessions = $item->total_sessions;
             $currentSession = 0;
-    
+
             // Xác định các ngày trong tuần (2-4-6 hoặc 3-5-7)
             $weekDays = in_array($startDate->dayOfWeek, [1, 3, 5]) ? [1, 3, 5] : [2, 4, 6];
-    
+
             // Tiến đến ngày hợp lệ đầu tiên trong tuần
             while (!in_array($startDate->dayOfWeek, $weekDays)) {
                 $startDate->addDay();
                 return $weekDays;
             }
-    
+
             // Tạo buổi học theo lịch 2-4-6 hoặc 3-5-7
             while ($currentSession < $totalSessions - 3) {
                 $key = $startDate->format('Y-m-d') . '-' . $item->class_code . '-' . ($item->room_code ?? '') . '-' . $item->session_code;
-    
+
                 if (!isset($existingSchedules[$key])) {
                     $createdDates[] = $startDate->format('Y-m-d');
                     $insertData[] = [
@@ -1200,23 +1213,23 @@ class CategoryController extends Controller
                         'teacher_code' => $item->teacher_code,
                         'type' => 'study'
                     ];
-    
+
                     $currentSession++;
                 }
-    
+
                 // Tăng ngày học tiếp theo trong tuần (chỉ chọn 2-4-6 hoặc 3-5-7)
                 do {
                     $startDate->addDay();
                 } while (!in_array($startDate->dayOfWeek, $weekDays));
             }
-    
+
             // Thêm lịch thi (3 buổi cách 1 tuần sau buổi cuối)
             $startDate->addWeek();
             $examCount = 0;
-    
+
             while ($examCount < 3) {
                 $key = $startDate->format('Y-m-d') . '-' . $item->class_code . '-' . ($item->room_code ?? '') . '-' . $item->session_code;
-    
+
                 if (!isset($existingSchedules[$key]) && in_array($startDate->dayOfWeek, $weekDays)) {
                     $insertData[] = [
                         'date' => $startDate->format('Y-m-d'),
@@ -1226,25 +1239,25 @@ class CategoryController extends Controller
                         'teacher_code' => $item->teacher_code,
                         'type' => 'exam'
                     ];
-    
+
                     $examCount++;
                 }
-    
+
                 // Tăng ngày thi tiếp theo (chỉ chọn 2-4-6 hoặc 3-5-7)
                 do {
                     $startDate->addDay();
                 } while (!in_array($startDate->dayOfWeek, $weekDays));
             }
         }
-    
+
         DB::table('schedules')->upsert($insertData, ['date', 'class_code', 'room_code', 'session_code'], ['type', 'teacher_code']);
-    
+
         return response()->json([
             'created_dates' => $createdDates,
             'message' => 'Schedules have been generated and inserted successfully!'
         ]);
     }
-    
+
 
 
 
@@ -1257,7 +1270,7 @@ class CategoryController extends Controller
             // Lấy danh sách sinh viên trong lớp của lịch học
             $students = DB::table('classroom_user')
                 ->where('class_code', $schedule->class_code)
-                ->get();    
+                ->get();
 
             foreach ($students as $student) {
                 // Tạo bản ghi điểm danh
@@ -1376,7 +1389,7 @@ class CategoryController extends Controller
     public function addStudent()
     {
         $classRooms = $this->getClassrooms(); // Lấy danh sách lớp học
-        $majors = $this->getListByMajor();
+        return $majors = $this->getListByMajor();
         $classroomStudentCounts = DB::table('classroom_user')
             ->select('class_code', DB::raw('COUNT(*) as current_count'))
             ->groupBy('class_code')

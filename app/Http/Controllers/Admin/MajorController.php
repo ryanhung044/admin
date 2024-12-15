@@ -65,6 +65,10 @@ class MajorController extends Controller
     public function store(StoreMajorRequest $request)
     {
         try {
+            if($request->parent_code == 'ALL'){
+                $cate_code = 'ALL_' . $request['cate_code'];
+                $request['cate_code'] = $cate_code;
+            }
             $params = $request->except('_token');
 
             if ($request->hasFile('image')) {

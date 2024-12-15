@@ -27,27 +27,34 @@ class UpdateSemesterCommand extends Command
      */
     public function handle()
     {
-        $students = User::where('role', '3') // Chỉ lấy sinh viên
-            ->select('id', 'semester_code') // Lấy ID và kỳ học hiện tại
+        $students = User::where('role', '3')->where('is_active',true) 
+            ->select('semester_code', 'user_code')
             ->get();
         foreach ($students as $student) {
-            // Lấy value hiện tại của kỳ học
             $currentSemester = DB::table('categories')
                 ->where('cate_code', $student->semester_code)
                 ->select('value')
                 ->first();
 
             if ($currentSemester) {
-                // Tìm cate_code của kỳ tiếp theo (value + 1)
                 $nextSemester = DB::table('categories')
                     ->where('value', $currentSemester->value + 1)
                     ->select('cate_code')
                     ->first();
 
                 if ($nextSemester) {
-                    // Cập nhật semester_code của sinh viên
                     $student->semester_code = $nextSemester->cate_code;
-                    $student->save(); // Lưu thay đổi
+                    $student->save();
+                } else {
+                    $hasIncompleteScores = DB::table('scores')
+                        ->where('student_code', $student->user_code)
+                        ->where('status', false) 
+                        ->exists();
+
+                    if (!$hasIncompleteScores) {
+                        $student->is_active = false;
+                        $student->save();
+                    }
                 }
             }
         }

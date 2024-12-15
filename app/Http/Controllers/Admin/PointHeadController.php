@@ -39,12 +39,13 @@ class PointHeadController extends Controller
     public function index(Request $request)
     {
         try {
+            $perPage = $request->input('per_page', 10);
 
             $search = $request->input('search');
             $data = AssessmentItem::when($search, function ($query, $search) {
                 return $query->where('name', 'like', "%{$search}%");
             })
-            ->paginate(4);
+            ->paginate($perPage);
 
             $data->getCollection()->transform(function ($item) {
                 return [

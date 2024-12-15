@@ -13,9 +13,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // Lên lịch chạy lệnh mỗi 3,5 tháng (105 ngày)
-        $schedule->command('update:semester')->cron('0 2 */105 * *'); //chạy lúc 2 giờ sáng, mỗi 105 ngày
-        $schedule->command('update:exam')->cron('0 2 */105 * *'); //chạy lúc 2 giờ sáng, mỗi 105 ngày
-        $schedule->command('update:score')->cron('0 2 */115 * *'); //chạy lúc 2 giờ sáng, mỗi 105 ngày
+        $schedule->command('update:exam')->cron('0 2 15 1,5,9 *');
+        $schedule->command('update:score')->cron('0 2 15 1,5,9 *');
+        $schedule->command('update:semester')->cron('0 2 17 1,5,9 *');
 
     }
 
