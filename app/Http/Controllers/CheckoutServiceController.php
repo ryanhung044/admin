@@ -205,7 +205,7 @@ class CheckoutServiceController extends Controller
         }
 
         $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // trang tra ve khi thanh toan
-        $vnp_Returnurl = "http://127.0.0.1:8000/api/return-vnpay/service"; // trang tra ve khi thanh cong
+        $vnp_Returnurl = "https://admin.feduvn.com/api/return-vnpay/service"; // trang tra ve khi thanh cong
         $vnp_TmnCode = "9COLR8TJ";//Mã website tại VNPAY
         $vnp_HashSecret = "E67F1MFW7JK7PGV3TIVR9HUJAGZSOIMA"; //Chuỗi bí mật
         $vnp_TxnRef = Carbon::now();
@@ -277,29 +277,23 @@ class CheckoutServiceController extends Controller
 
     public function vnpay_payment_return(Request $request){
         $data = $request->all();
-        // dd($data);
-
-        $payDate = \Carbon\Carbon::createFromFormat('YmdHis', $request->input('vnp_PayDate'))
-                                    ->format('Y-m-d H:i:s');
-
+        dd($data);
         $vnp_TransactionNo = $request->input('vnp_TransactionNo');
         $vnp_Amount        = $request->input('vnp_Amount');
 
          $vnp_ResponseCode = $request->input('vnp_ResponseCode');
          $vnp_OrderInfo = $request->input('vnp_OrderInfo');
 
-
          if ($vnp_ResponseCode == '00') {
 
-            $orderInfo = json_decode($vnp_OrderInfo, true); // true chuyển đổi thành mảng PHP
-            $serviceId = $orderInfo['service_id']; // Lấy service_id
-            $userCode = $orderInfo['user_code'];
+            $orderInfo  = json_decode($vnp_OrderInfo, true); // true chuyển đổi thành mảng PHP
+            $serviceId  = $orderInfo['service_id']; // Lấy service_id
+            $userCode   = $orderInfo['user_code'];
 
             // Thực hiện logic cập nhật dịch vụ trong bảng
             $service = Service::find($serviceId);
             if ($service) {
                 $service->status = 'paid';
-                $service->user_code = $userCode;
                 $service->save();
             }
 
@@ -314,7 +308,7 @@ class CheckoutServiceController extends Controller
                 'receipt_number'=> $vnp_TransactionNo,
             ];
 
-            // dd($dataTransaction);
+            dd($dataTransaction);
             Transaction::create($dataTransaction);
             return redirect()->route('payment.success')->with('success', 'Thanh toán thành công!');
         } else {

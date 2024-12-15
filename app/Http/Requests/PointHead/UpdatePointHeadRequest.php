@@ -27,10 +27,6 @@ class UpdatePointHeadRequest extends FormRequest
             'cate_code' => 'required|unique:categories,cate_code,' . $this->route('pointhead') . ',cate_code',
             'cate_name' => 'required|max:255|regex:/^[^<>{}]*$/',
             'value' => 'regex:/^[^<>{}]*$/',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg',
-            'description' => 'regex:/^[^<>{}]*$/',
-            'parent_code' => 'regex:/^[^<>{}]*$/',
-            'is_active' => 'regex:/^[^<>{}]*$/'
         ];
     }
 
@@ -43,11 +39,6 @@ class UpdatePointHeadRequest extends FormRequest
             'cate_name.max' => 'Tên chuyên ngành không quá 255 kí tự',
             'cate_name.regex' => 'Tên chuyên ngành không chứa kí tự đặc biệt',
             'value.regex' => 'Giá trị không chứa kí tự đặc biệt',
-            'image.image' => 'File phải là ảnh',
-            'image.mimes' => 'File ảnh phải có định dạng jpeg, png, jpg, gif, hoặc svg.',
-            'description.regex' => 'Mô tả không chứa kí tự đặc biệt',
-            'parent_code.regex' => 'Không chứa kí tự đặc biệt',
-            'is_active.regex' => 'Trạng thái không chứa kí tự đặc biệt'
         ];
     }
 

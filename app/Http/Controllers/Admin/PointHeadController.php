@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\AssessmentItem;
 use Throwable;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -38,21 +39,27 @@ class PointHeadController extends Controller
     public function index(Request $request)
     {
         try {
-            // Tìm kiếm theo cate_name
+
             $search = $request->input('search');
-            $data = Category::where('type', '=', 'point_head')
-                                ->when($search, function ($query, $search) {
-                                    
-                                    return $query
-                                            ->where('cate_name', 'like', "%{$search}%");
-                                })
-                                ->paginate(4);
+            $data = AssessmentItem::when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })
+            ->paginate(4);
+
+            $data->getCollection()->transform(function ($item) {
+                return [
+                    'cate_code' => $item->assessment_code,
+                    'cate_name' => $item->name,
+                    'value' => $item->weight,
+                ];
+            });
+
             if ($data->isEmpty()) {
 
                 return $this->handleInvalidId();
             }
-
             return response()->json($data, 200);
+
         } catch (Throwable $th) {
 
             return $this->handleErrorNotDefine($th);
@@ -62,29 +69,22 @@ class PointHeadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePointHeadRequest $request)
+    public function store(StorePointHeadRequest $request )
     {
         try {
-            // Lấy ra cate_code và cate_name của cha
-            $parent = Category::whereNull('parent_code')
-                                ->where('type', '=', 'point_head')
-                                ->select('cate_code', 'cate_name')
-                                ->get();
 
-            $params = $request->except('_token');
-            if ($request->hasFile('image')) {
-                $fileName = $request->file('image')->store('uploads/image', 'public');
-            } else {
-                $fileName = null;
-            }
+            $data = [
+                'assessment_code' => $request->cate_code,
+                'name'            => $request->cate_name,
+                'weight'          => $request->value
+            ];
 
-            $params['image'] = $fileName;
-            Category::create($params);
+            AssessmentItem::create($data);
+            return response()->json($data, 200);
 
-            return response()->json($params, 200);
+            return response()->json($assessmentItem, 200);
         } catch (Throwable $th) {
-
-            return $this->handleErrorNotDefine($th);
+            return response()->json(['message'=> $th->getMessage()], 500);
         }
     }
 
@@ -95,13 +95,17 @@ class PointHeadController extends Controller
     public function show(string $cate_code)
     {
         try {
-            $pointHead = Category::where('cate_code', $cate_code)->first();
-            if (!$pointHead) {
+            $pointHead = AssessmentItem::where('assessment_code',$cate_code)->first();
 
+            $data = [
+                'cate_code' => $pointHead->assessment_code,
+                'cate_name' => $pointHead->name,
+                'value'     => $pointHead->weight
+            ];
+            if (!$data) {
                 return $this->handleInvalidId();
             } else {
-
-                return response()->json($pointHead, 200);                
+                return response()->json($data, 200);
             }
         } catch (\Throwable $th) {
 
@@ -114,37 +118,21 @@ class PointHeadController extends Controller
      */
     public function update(UpdatePointHeadRequest $request, string $cate_code)
     {
-        DB::beginTransaction();
         try {
             // Lấy ra cate_code và cate_name của cha
-            $parent = Category::whereNull('parent_code')
-                                ->where('type', '=', 'point_head')
-                                ->select('cate_code', 'cate_name')
-                                ->get();
+            $data = [
+                'assessment_code' => $request->cate_code,
+                'name'            => $request->cate_name,
+                'weight'          => $request->value
+            ];
 
-            $listPointHead = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
-            if (!$listPointHead) {
-                DB::rollBack();
 
-                return $this->handleInvalidId();
-            } else {
-                $params = $request->except('_token', '_method');
-                if ($request->hasFile('image')) {
-                    if ($listPointHead->image && Storage::disk('public')->exists($listPointHead->image)) {
-                        Storage::disk('public')->delete($listPointHead->image);
-                    }
-                    $fileName = $request->file('image')->store('uploads/image', 'public');
-                } else {
-                    $fileName = $listPointHead->image;
-                }
-                $params['image'] = $fileName;
-                $listPointHead->update($params);
-                DB::commit();
+            $PointHead = AssessmentItem::where('assessment_code', $cate_code)->first();
+            $PointHead->update($data);
 
-                return response()->json($listPointHead, 201);          
-            }
+            return response()->json($PointHead, 201);
+
         } catch (Throwable $th) {
-
             return $this->handleErrorNotDefine($th);
         }
     }
@@ -154,24 +142,31 @@ class PointHeadController extends Controller
      */
     public function destroy(string $cate_code)
     {
-        DB::beginTransaction();
         try {
-            $listPointHead = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
-            if (!$listPointHead) {
-                DB::rollBack();
+            $isUsed = DB::table('subject_assessment')
+            ->where('assessment_code', $cate_code) // Thay đổi 'assessment_code' thành cột tương ứng trong bảng subject_assessment
+            ->exists();
 
-                return $this->handleInvalidId();
-            } else {
-                if ($listPointHead->image && Storage::disk('public')->exists($listPointHead->image)) {
-                    Storage::disk('public')->delete($listPointHead->image);
-                }
-                $listPointHead->delete($listPointHead);
-                DB::commit();
-
+            if ($isUsed) {
                 return response()->json([
-                    'message' => 'Xoa thanh cong'
-                ], 200);            
+                    'message' => 'Không thể xóa vì mã đầu điểm đang được sử dụng.'
+                ], 400); // 400: Bad Request
             }
+
+            $PointHead = AssessmentItem::where('assessment_code', $cate_code)->first();
+
+            if (!$PointHead) {
+                return response()->json([
+                    'message' => 'Mã đầu điểm không tồn tại.'
+                ], 404); // 404: Not Found
+            }
+            
+            $PointHead->delete();
+
+            return response()->json([
+                    'message' => 'Xóa thành công'
+            ], 200);
+
         } catch (Throwable $th) {
 
             return $this->handleErrorNotDefine($th);
@@ -182,19 +177,19 @@ class PointHeadController extends Controller
     {
         try {
             $activies = $request->input('is_active'); // Lấy dữ liệu từ request
-    
+
             DB::transaction(function () use ($activies) {
                 foreach ($activies as $cate_code => $active) {
                     // Tìm category theo cate_code và áp dụng lock for update
                     $category = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
-    
+
                     if ($category) {
                         $category->is_active = $active; // Sửa lại đúng field
                         $category->save();
                     }
                 }
             });
-    
+
             return response()->json([
                 'message' => 'Trạng thái đã được cập nhật thành công!'
             ], 200);

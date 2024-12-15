@@ -16,7 +16,6 @@ class ScoreRepository implements ScoreRepositoryInterface{
         $subject = $classroom->subject;
         $assessmentItem = $subject->assessmentItem;
 
-
         $students = Classroom::where('id', $id)->pluck('students')->first();
 
          if (!$students) {
@@ -29,7 +28,6 @@ class ScoreRepository implements ScoreRepositoryInterface{
                     'assessment_item' => $assessmentItem
                 ];
             }
-
          return $assessmentItem;
     }
 

@@ -31,22 +31,22 @@ class SessionController extends Controller
         }
     }
 
-    public function show($cate_code)
-    {
-        try {
-            $model = $this->sessionRepository->getByCateCode($cate_code);
-            
-            if (!$model) {
-                return response()->json(['message' => 'Data not found'], 404);
-            }
+    // public function show($cate_code)
+    // {
+    //     try {
+    //         $model = $this->sessionRepository->getByCateCode($cate_code);
 
-            return response()->json($model, 200);
-        } catch (NotFoundHttpException $e) {
-            return response()->json(['message' => $e->getMessage()], 404);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()], 500);
-        }
-    }
+    //         if (!$model) {
+    //             return response()->json(['message' => 'Data not found'], 404);
+    //         }
+
+    //         return response()->json($model, 200);
+    //     } catch (NotFoundHttpException $e) {
+    //         return response()->json(['message' => $e->getMessage()], 404);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['message' => $th->getMessage()], 500);
+    //     }
+    // }
 
     public function store(StoreSessionRequest $request){
         try{

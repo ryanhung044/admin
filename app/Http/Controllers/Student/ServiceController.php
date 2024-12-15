@@ -65,13 +65,11 @@ class ServiceController extends Controller
   public function ServiceInformation(int $id)
   {
     try {
-
       $data = Service::with('student')->find($id);
 
       if (!$data) {
         return response()->json(['message' => 'Service not found'], 404);
       }
-
       return response()->json(['data' => $data]);
     } catch (\Throwable $th) {
       return response()->json(['message' => $th->getMessage()], 500);
@@ -171,22 +169,16 @@ class ServiceController extends Controller
   public function changeStatus(int $id, Request $request)
   {
     try {
-      $message = "";
-      $status = $request->status;
-      $reason  = $request->reason;
 
-      $service = Service::where('id', $id)->firstOrFail();  // Lấy dịch vụ
+      $status = $request->input('status');
+      $reason = $request->input('reason', null);
 
-      // Xử lý trạng thái
-      if ($status == "approved") {
-        $message = "Đã được duyệt";
-      }
+      if (!in_array($status, ['approved', 'rejected'])) {
+        return response()->json(['message' => 'Trạng thái không hợp lệ']);
+        }
 
-      if ($status == "rejected") {
-        $message = "Đã bị từ chối";
-      }
+      $service = Service::findOrFail($id);  // Lấy dịch vụ
 
-      // Cập nhật trạng thái dịch vụ
       $service->update([
         'status' => $status,
         'reason' => $reason
@@ -200,8 +192,8 @@ class ServiceController extends Controller
         "full_name" => $user->full_name,
         "user_code" => $user->user_code,
         "service_name" => $service->service_name,
-        "status" => $message,
-        "reason" => $reason ? $reason : 'Không có lý do',  // Nếu không có lý do, hiển thị 'Không có lý do'
+        "status" => $status == "approved" ? "Đã được duyệt" : "Đã bị từ chối",
+        "reason" => $reason ? $reason : 'Không có lý do',
       ];
 
       Mail::to($user->email)->send(new ServiceStatusChanged($data));

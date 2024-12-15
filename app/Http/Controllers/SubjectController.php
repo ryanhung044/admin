@@ -202,7 +202,7 @@ class SubjectController extends Controller
                 ]);
             }
 
-            $is_studying = Classroom::where('subject_code', $subject_code)->exists();
+            $is_studying = Classroom::where('subject_code', $subject_code)->withTrashed()->exists();
 
             if ($is_studying) {
                 return response()->json([

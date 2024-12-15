@@ -42,15 +42,11 @@ class WalletController extends Controller
 
             Wallet::create($data);
         }
-
         return response()->json(['message'=>'create thanh cong']);
     }
 
     public function show(Wallet $wallet)
     {
-
-
-
     }
 
     /**

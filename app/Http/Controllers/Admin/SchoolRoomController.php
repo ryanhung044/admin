@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Category;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -156,17 +157,30 @@ class SchoolRoomController extends Controller
             if (!$listSchoolRoom) {
                 DB::rollBack();
                 return $this->handleInvalidId();
-            } else {
-                if ($listSchoolRoom->image && Storage::disk('public')->exists($listSchoolRoom->image)) {
-                    Storage::disk('public')->delete($listSchoolRoom->image);
-                }
-                $listSchoolRoom->delete();
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Xóa thành công'
-                ], 200);
             }
+
+            // Kiểm tra xem phòng học có trong bảng schedules không
+            $hasFutureSchedules = Schedule::where('room_code', $cate_code)
+                ->whereDate('date', '>=', now()->toDateString())
+                ->exists();
+
+            if ($hasFutureSchedules) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Không thể xóa phòng học vì có lịch học hiện tại hoặc trong tương lai!'
+                ], 409);
+            }
+
+            if ($listSchoolRoom->image && Storage::disk('public')->exists($listSchoolRoom->image)) {
+                Storage::disk('public')->delete($listSchoolRoom->image);
+            }
+            $listSchoolRoom->delete();
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Xóa thành công'
+            ], 200);
         } catch (\Throwable $th) {
 
             return $this->handleErrorNotDefine($th);
