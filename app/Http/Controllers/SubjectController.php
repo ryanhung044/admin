@@ -45,8 +45,8 @@ class SubjectController extends Controller
                 ->when($search, function ($query, $search) {
                     $query->where(function ($q) use ($search) {
                         $q->where('subject_code', 'like', "%{$search}%")
-                        ->orWhere('subject_name', 'like', "%{$search}%")
-                        ->orWhere('major_code', 'like', "%{$search}%");
+                            ->orWhere('subject_name', 'like', "%{$search}%")
+                            ->orWhere('major_code', 'like', "%{$search}%");
                     });
                 })
                 ->paginate($perPage);
@@ -58,18 +58,19 @@ class SubjectController extends Controller
         } catch (\Throwable $th) {
             return $this->handleErrorNotDefine($th);
         }
-    }   
+    }
 
     public function store(Request $request)
     {
         try {
             // Lấy mã môn học mới nhất và tạo subject_code mới
             $newestSubjectCode = Subject::withTrashed()
-                ->where('major_code', 'LIKE', $request['major_code'])
+                ->where('major_code', $request['major_code'])
                 ->where('subject_code', 'LIKE', $request['major_code'] . '%')
-                ->selectRaw("MAX(CAST(SUBSTRING(subject_code, 4) AS UNSIGNED)) as max_number")
+                ->selectRaw(" (CAST(SUBSTRING(subject_code, LENGTH(?) + 1) AS UNSIGNED)) as max_number", [$request['major_code']])
                 ->value('max_number');
-                // return response()->json($newestSubjectCode, 500);
+
+            // return response()->json($newestSubjectCode, 500);
             $nextNumber = $newestSubjectCode ? $newestSubjectCode + 1 : 1;
 
             $newSubjectCode = $request['major_code'] . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
