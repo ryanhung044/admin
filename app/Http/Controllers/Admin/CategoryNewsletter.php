@@ -129,7 +129,7 @@ class CategoryNewsletter extends Controller
      */
     public function update(UpdateCategoryRequest $request, string $cate_code)
     {
-        DB::beginTransaction();
+        
         try {
             // Lấy ra cate_code và cate_name của cha
             $parent = Category::whereNull('parent_code')
@@ -137,9 +137,9 @@ class CategoryNewsletter extends Controller
                 ->select('cate_code', 'cate_name')
                 ->get();
 
-            $listCategory = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listCategory = Category::where('cate_code', $cate_code)->first();
             if (!$listCategory) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -154,7 +154,7 @@ class CategoryNewsletter extends Controller
                 }
                 $params['image'] = $fileName;
                 $listCategory->update($params);
-                DB::commit();
+                
 
                 return response()->json($listCategory, 201);
             }
@@ -169,11 +169,11 @@ class CategoryNewsletter extends Controller
      */
     public function destroy(string $cate_code)
     {
-        DB::beginTransaction();
+        
         try {
-            $listCategory = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listCategory = Category::where('cate_code', $cate_code)->first();
             if (!$listCategory) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -181,7 +181,7 @@ class CategoryNewsletter extends Controller
                     Storage::disk('public')->delete($listCategory->image);
                 }
                 $listCategory->delete($listCategory);
-                DB::commit();
+                
 
                 return response()->json([
                     'message' => 'Xóa thành công'
@@ -198,17 +198,17 @@ class CategoryNewsletter extends Controller
         try {
             $activies = $request->input('is_active'); // Lấy dữ liệu từ request
     
-            DB::transaction(function () use ($activies) {
+            
                 foreach ($activies as $cate_code => $active) {
                     // Tìm category theo cate_code và áp dụng lock for update
-                    $category = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+                    $category = Category::where('cate_code', $cate_code)->first();
     
                     if ($category) {
                         $category->is_active = $active; // Sửa lại đúng field
                         $category->save();
                     }
-                }
-            });
+                };
+
     
             return response()->json([
                 'message' => 'Trạng thái đã được cập nhật thành công!'

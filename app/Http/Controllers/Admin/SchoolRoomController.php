@@ -116,11 +116,11 @@ class SchoolRoomController extends Controller
      */
     public function update(UpdateSchoolRoomRequest $request, string $cate_code)
     {
-        DB::beginTransaction();
+        
         try {
-            $listSchoolRoom = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listSchoolRoom = Category::where('cate_code', $cate_code)->first();
             if (!$listSchoolRoom) {
-                DB::rollBack();
+                
                 return $this->handleInvalidId();
             } else {
                 // return response()->json($request->all(), 201);
@@ -135,8 +135,8 @@ class SchoolRoomController extends Controller
                 }
                 $params['image'] = $fileName;
                 $listSchoolRoom->update($params);
-                // DB::rollBack();
-                DB::commit();
+                // 
+                
 
                 return response()->json($listSchoolRoom, 201);
             }
@@ -151,11 +151,11 @@ class SchoolRoomController extends Controller
      */
     public function destroy(string $cate_code)
     {
-        DB::beginTransaction();
+        
         try {
-            $listSchoolRoom = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listSchoolRoom = Category::where('cate_code', $cate_code)->first();
             if (!$listSchoolRoom) {
-                DB::rollBack();
+                
                 return $this->handleInvalidId();
             }
 
@@ -165,7 +165,7 @@ class SchoolRoomController extends Controller
                 ->exists();
 
             if ($hasFutureSchedules) {
-                DB::rollBack();
+                
                 return response()->json([
                     'status' => false,
                     'message' => 'Không thể xóa phòng học vì có lịch học hiện tại hoặc trong tương lai!'
@@ -176,7 +176,7 @@ class SchoolRoomController extends Controller
                 Storage::disk('public')->delete($listSchoolRoom->image);
             }
             $listSchoolRoom->delete();
-            DB::commit();
+            
 
             return response()->json([
                 'message' => 'Xóa thành công'
@@ -195,7 +195,7 @@ class SchoolRoomController extends Controller
             DB::transaction(function () use ($activies) {
                 foreach ($activies as $cate_code => $active) {
                     // Tìm category theo cate_code và áp dụng lock for update
-                    $category = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+                    $category = Category::where('cate_code', $cate_code)->first();
 
                     if ($category) {
                         $category->is_active = $active; // Sửa lại đúng field

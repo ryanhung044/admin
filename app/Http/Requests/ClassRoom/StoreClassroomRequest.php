@@ -30,7 +30,7 @@ class StoreClassroomRequest  extends FormRequest
                 'subject_code' => 'required|exists:subjects,subject_code',
                 'session_code' => 'required|exists:categories,cate_code',
                 'room_code' => 'required|exists:categories,cate_code',
-                'teacher_code' => 'nullable|exists:users,user_code',
+                'teacher_code' => 'required|exists:users,user_code',
                 'list_study_dates' => 'required|array',
                 'list_study_dates.*' => 'date|after_or_equal:tomorrow|date_format:Y-m-d',
                 'student_codes' => 'required|array'
@@ -52,6 +52,7 @@ class StoreClassroomRequest  extends FormRequest
             'session_code.exists' => 'Ca học không tồn tại!',
             'room_code.required' => 'Bạn chưa chọn phòng học!',
             'room_code.exists' => 'Phòng học không tồn tại trong hệ thống!',
+            'teacher_code.required' => 'Bạn chưa chọn giảng viên!',
             'teacher_code.exists' => 'Giảng viên này không tồn tại trong hệ thống!',
             'list_study_dates.required' => 'Bạn chưa chọn các ngày học!',
             'list_study_dates.array' => 'Danh sách các ngày học phải là 1 mảng!',

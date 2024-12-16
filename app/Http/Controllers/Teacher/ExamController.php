@@ -139,14 +139,14 @@ class ExamController extends Controller
     public function store(StoreStudentToExamDayRequest $request)
     {
         try {
-            DB::beginTransaction();
+            
 
             $data_from_request = $request->validated();
             // Lấy ra danh sách sinh viên và ngày thi tương ứng với từng sinh viên
             $students = $data_from_request['students'];
             $class_code = $data_from_request['class_code'];
             $classroom = Classroom::select('class_code', 'class_name')->with(['schedules' => function($query){
-                $query->where('type', 'exam')->select('id', 'class_code')->lockForUpdate();
+                $query->where('type', 'exam')->select('id', 'class_code');
             }])->where('class_code', $class_code)
             ->first();
 
@@ -172,14 +172,14 @@ class ExamController extends Controller
 
             ScheduleStudent::insert($students_should_add_examday->toArray());
 
-            DB::commit();
+            
 
             return response()->json([
                 'status' => true,
                 'message' => 'Lưu sinh viên vào ca thi thành công!'
             ],201);
         } catch (\Throwable $th) {
-            DB::rollback();
+            
             return $this->handleErrorNotDefine($th);
         }
     }

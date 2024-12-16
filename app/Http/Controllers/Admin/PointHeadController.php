@@ -127,9 +127,9 @@ class PointHeadController extends Controller
                 'weight'          => $request->value
             ];
 
-
             $PointHead = AssessmentItem::where('assessment_code', $cate_code)->first();
             $PointHead->update($data);
+
 
             return response()->json($PointHead, 201);
 
@@ -179,17 +179,16 @@ class PointHeadController extends Controller
         try {
             $activies = $request->input('is_active'); // Lấy dữ liệu từ request
 
-            DB::transaction(function () use ($activies) {
                 foreach ($activies as $cate_code => $active) {
                     // Tìm category theo cate_code và áp dụng lock for update
-                    $category = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+
+                    $category = Category::where('cate_code', $cate_code)->first(); 
 
                     if ($category) {
                         $category->is_active = $active; // Sửa lại đúng field
                         $category->save();
                     }
-                }
-            });
+                };
 
             return response()->json([
                 'message' => 'Trạng thái đã được cập nhật thành công!'

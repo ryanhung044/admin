@@ -95,4 +95,25 @@ class AuthController extends Controller
     }
 
     }
+
+    public function changePassword(Request $request)
+    {
+        // Validate input
+        try{
+            $request->validate([
+                'current_password' => 'required',
+                'new_password' => 'required|min:8|confirmed',
+            ]);
+
+            $user_code = $request->user()->user_code;
+
+            $user = User::where('user_code', $user_code)->firstOrFail();
+            $user->update(['password' => bcrypt($request->new_password)]);
+
+
+            return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công.']);
+        }catch(\Throwable $th){
+            return response()->json(['error' => $th->getMessage()]);
+        }
+    }
 }

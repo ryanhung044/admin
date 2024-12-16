@@ -13,27 +13,42 @@ use App\Models\Category;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
-class FeeRepository implements FeeRepositoryInterface
-{
-    public function getAll($email = null, $status = null)
+class FeeRepository implements FeeRepositoryInterface {
+   public function getAll($email = null, $status = null, $search = null, $orderBy = 'created_at', $orderDirection = 'desc')
     {
-        $data =  Fee::query()->with(['user' => function ($query) {
+        $data = Fee::query()->with(['user' => function ($query) {
             $query->select('id', 'user_code', 'full_name', 'email', 'phone_number');
         }]);
-
-        if ($status) {
-            $data->where('status', $status);
-        }
-
-        if ($email) {
-            $data->whereHas('user', function ($query) use ($email) {
-                $query->where('email', 'like', '%' . $email . '%');
+    
+            // Lọc theo status
+            if ($status) {
+                $data->where('status', $status);
+            }
+    
+            // Lọc theo email của user
+            if ($email) {
+                $data->whereHas('user', function ($query) use ($email) {
+                    $query->where('email', 'like', '%' . $email . '%');
+                });
+            }
+    
+        // Tìm kiếm chung
+        if ($search) {
+            $data->where(function ($query) use ($search) {
+                $query->orWhere('semester_code', 'like', '%' . $search . '%') // Học kỳ
+                    ->orWhere('amount', $search) // Số tiền
+                    ->orWhere('total_amount', $search) // Tổng tiền
+                    ->orWhere('status', 'like', '%' . $search . '%') // Trạng thái
+                    ->orWhereHas('user', function ($q) use ($search) {
+                        $q->where('user_code', 'like', '%' . $search . '%') // Mã user
+                          ->orWhere('email', 'like', '%' . $search . '%'); // Email
+                    });
             });
         }
-
-        return $data->paginate(20);
+        $data->orderBy($orderBy, $orderDirection);
+    
+            return $data->paginate(20);
     }
-
     // public function createAll(){
 
     //     Transaction::query()->delete();

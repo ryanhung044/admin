@@ -140,7 +140,7 @@ class AttendanceController extends Controller
     public function update(UpdateAttendanceRequest $request, string $classCode)
     {
         // return $request;
-        DB::beginTransaction();
+        
         try {
             $attendances = $request->validated();
 
@@ -167,14 +167,14 @@ class AttendanceController extends Controller
                 );
             }
 
-            DB::commit();
+            
 
             return response()->json([
                 'message' => 'Update thành công.',
                 'data' => $attendances,
             ], 200);
         } catch (Throwable $th) {
-            DB::rollBack();
+            
 
             // Trả về thông báo lỗi chi tiết
             return response()->json([
@@ -190,16 +190,16 @@ class AttendanceController extends Controller
      */
     public function destroy(string $id)
     {
-        DB::beginTransaction();
+        
         try {
-            $attendances = Attendance::where('id', $id)->lockForUpdate()->first();
+            $attendances = Attendance::where('id', $id)->first();
             if (!$attendances) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
                 $attendances->delete($attendances);
-                DB::commit();
+                
 
                 return response()->json([
                     'message' => 'Xoa thanh cong'

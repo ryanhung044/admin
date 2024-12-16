@@ -123,12 +123,12 @@ class MajorController extends Controller
     {
         // return response()->json($request, 201);
 
-        DB::beginTransaction();
+        
         try {
-            $listMajor = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listMajor = Category::where('cate_code', $cate_code)->first();
 
             if (!$listMajor) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -146,7 +146,7 @@ class MajorController extends Controller
                 $params['image'] = $fileName;
                 $listMajor->is_active =  $params['is_active'];
                 $listMajor->update($params);
-                DB::commit();
+                
 
                 return response()->json($listMajor, 201);
             }
@@ -161,11 +161,11 @@ class MajorController extends Controller
      */
     public function destroy(string $cate_code)
     {
-        DB::beginTransaction();
+        
         try {
-            $listMajor = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+            $listMajor = Category::where('cate_code', $cate_code)->first();
             if (!$listMajor) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -173,7 +173,7 @@ class MajorController extends Controller
                     Storage::disk('public')->delete($listMajor->image);
                 }
                 $listMajor->delete($listMajor);
-                DB::commit();
+                
 
                 return response()->json([
                     'message' => 'Xóa thành công'
@@ -193,7 +193,7 @@ class MajorController extends Controller
             DB::transaction(function () use ($activies) {
                 foreach ($activies as $cate_code => $active) {
                     // Tìm category theo cate_code và áp dụng lock for update
-                    $category = Category::where('cate_code', $cate_code)->lockForUpdate()->first();
+                    $category = Category::where('cate_code', $cate_code)->first();
 
                     if ($category) {
                         $category->is_active = $active; // Sửa lại đúng field

@@ -206,7 +206,7 @@ class ScheduleController extends Controller
                         'status' => false,
                         'message' => 'Thời gian kết thúc phải lớn hơn thời gian bắt đầu!'
                     ],
-                    403
+                    422
                 );
             }
 

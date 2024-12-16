@@ -99,23 +99,38 @@ class NewsletterController extends Controller
      */
     public function store(StoreNewsletterRequest $request)
     {
-        // try {
+        try {
             $params = $request->except('_token');
 
+            // Xử lý ảnh nếu có
             if ($request->hasFile('image')) {
                 $fileName = $request->file('image')->store('uploads/image', 'public');
             } else {
                 $fileName = null;
             }
-
+    
             $params['image'] = $fileName;
+    
+            $categoryCode = $params['cate_code'];
+    
+            $lastPost = Newsletter::where('cate_code', $categoryCode)
+                ->orderBy('id', 'desc')
+                ->first();
+    
+            // Lấy số thứ tự tăng dần từ bài viết cuối cùng
+            $lastIndex = $lastPost ? intval(substr($lastPost->code, strlen($categoryCode))) : 0;
+            $newIndex = $lastIndex + 1;
+    
+            // Tạo mã bài viết mới
+            $params['code'] = $categoryCode . str_pad($newIndex, 3, '0', STR_PAD_LEFT);
+
             Newsletter::create($params);
-
+    
             return response()->json($params, 200);
-        // } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
-        //     return $this->handleErrorNotDefine($th);
-        // }
+            return $this->handleErrorNotDefine($th);
+        }
     }
 
 
@@ -165,11 +180,11 @@ class NewsletterController extends Controller
      */
     public function update(UpdateNewsletterRequest $request, string $code)
     {
-        DB::beginTransaction();
+        
         try {
-            $newsletters = Newsletter::where('code', $code)->lockForUpdate()->first();
+            $newsletters = Newsletter::where('code', $code)->first();
             if (!$newsletters) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -184,7 +199,7 @@ class NewsletterController extends Controller
                 }
                 $params['image'] = $fileName;
                 $newsletters->update($params);
-                DB::commit();
+                
 
                 return response()->json($newsletters, 201);          
             }
@@ -199,11 +214,11 @@ class NewsletterController extends Controller
      */
     public function destroy(string $code)
     {
-        DB::beginTransaction();
+        
         try {
-            $newsletters = Newsletter::where('code', $code)->lockForUpdate()->first();
+            $newsletters = Newsletter::where('code', $code)->first();
             if (!$newsletters) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             } else {
@@ -211,7 +226,7 @@ class NewsletterController extends Controller
                     Storage::disk('public')->delete($newsletters->image);
                 }
                 $newsletters->delete();
-                DB::commit();
+                
 
                 return response()->json([
                     'message' => 'Xóa thành công'
@@ -225,12 +240,12 @@ class NewsletterController extends Controller
     
     public function copyNewsletter(string $code)
     {
-        DB::beginTransaction();
+        
         try {
-            $newsletters = Newsletter::where('code', $code)->lockForUpdate()->first();
+            $newsletters = Newsletter::where('code', $code)->first();
         
             if (!$newsletters) {
-                DB::rollBack();
+                
 
                 return $this->handleInvalidId();
             }
@@ -251,7 +266,7 @@ class NewsletterController extends Controller
             $newPost->created_at = now();
             $newPost->updated_at = now();
             $newPost->save();
-            DB::commit();
+            
 
             return response()->json($newPost, 200);
         } catch (\Throwable $th) {

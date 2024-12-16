@@ -55,7 +55,7 @@ class SessionController extends Controller
 
             $differenceInHours = $timeStart->diffInHours($timeEnd);
             if ($differenceInHours !== 2) {
-                return response()->json(["message" => "Thời gian bắt đầu và kết thúc phải cách nhau 2 tiếng."], 400);
+                return response()->json(["message" => "Thời gian bắt đầu và kết thúc phải cách nhau 2 tiếng."], 500);
             }
 
             $existingSessions = $this->sessionRepository->getAll();
@@ -80,7 +80,7 @@ class SessionController extends Controller
             $value_json = json_encode($value);
 
 
-            $cate_code = "SS0".$request->session;
+            $cate_code = "TS".$request->session;
             $cate_name = "Ca ".$request->session;
             $value = $value_json;
             $data = [

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Teacher\DeleteTeacherRequest;
 use App\Http\Requests\Teacher\StoreTeacherRequest;
 use App\Http\Requests\Teacher\UpdateTeacherRequest;
+use App\Models\Classroom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class TeacherController extends Controller
 
     public function index(Request $request)
     {
-        // try {
+        try {
             $perPage = $request->input('per_page', 10);
             $search = $request->input('search');
             $teachers = User::where([
@@ -60,29 +61,30 @@ class TeacherController extends Controller
                 'full_name',
                 'email',
                 'sex',
-                'is_active'
-            )->orderBy('user_code','desc')->paginate($perPage);
+                'is_active',
+                'deleted_at',
+            )->withTrashed()->orderBy('user_code','desc')->paginate($perPage);
 
             return response()->json($teachers, 200);
-        // } catch (\Throwable $th) {
-        //     return $this->handleErrorNotDefine($th);
-        // }
+        } catch (\Throwable $th) {
+            return $this->handleErrorNotDefine($th);
+        }
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    // public function create()
+    // {
+    //     //
+    // }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreTeacherRequest $request)
     {
-        DB::beginTransaction();
+        
         // try {
         //     $data = $request->validated();
 
@@ -95,14 +97,14 @@ class TeacherController extends Controller
         //     $data['user_code'] = $new_teacher_code;
         //     $data['role'] = '2';
         //     User::create($data);
-        //     DB::commit();
+        //     
 
         //     return response()->json([
         //         'status' => true,
         //         'message' => 'Thêm mới giảng viên thành công!'
         //     ],201);
         // } catch (\Throwable $th) {
-        //     DB::rollback();
+        //     
         //     return $this->handleErrorNotDefine($th);
         // }
 
@@ -118,13 +120,13 @@ class TeacherController extends Controller
             $data['role'] = '2';
             User::create($data);
 
-            DB::commit();
+            
             return response()->json([
                 'status' => true,
                 'message' => 'Thêm mới giảng viên thành công!'
             ], 201);
         } catch (\Throwable $th) {
-            DB::rollback();
+            
             return $this->handleErrorNotDefine($th);
         }
     }
@@ -179,10 +181,10 @@ class TeacherController extends Controller
     public function update(UpdateTeacherRequest $request, string $teacher_code)
     {
         try {
-            DB::beginTransaction();
+
             $data = $request->validated();
             // return response()->json($data);
-            $teacher = User::where('user_code', $teacher_code)->lockForUpdate()->first();
+            $teacher = User::where('user_code', $teacher_code)->first();
 
             if(!$teacher){
                 return $this->handleInvalidId();
@@ -197,13 +199,13 @@ class TeacherController extends Controller
             }
 
             $teacher->update($data);
-            DB::commit();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Chỉnh sửa thông tin giảng viên thành công!'
             ],200);
         } catch (\Throwable $th) {
-            DB::rollback();
+
             return $this->handleErrorNotDefine($th);
         }
     }
@@ -213,32 +215,58 @@ class TeacherController extends Controller
      */
     public function destroy($teacher_code)
     {
-        DB::beginTransaction();
-        try {
-            // $data = $request->validated();
 
-            $teacher = User::where('user_code', $teacher_code)->lockForUpdate()->first();
+        try {
+
+
+            $teacher = User::where('user_code', $teacher_code)->first();
 
             if (!$teacher) {
                 return $this->handleInvalidId();
             }
 
-            // if ($teacher->updated_at->toDateTimeString() !== $data['updated_at']) {
+
+            // $is_exist_classroom_teaching = Classroom::where('user_code', $teacher->user_code)->where('is_active', true)->exists();
+            
+            // if($is_exist_classroom_teaching){
             //     return response()->json([
             //         'status' => false,
-            //         'message' => 'Bản ghi này đã có cập nhật trước đó, vui lòng cập nhật lại trang!'
-            //     ], 409);
+            //         'message' => 'Giảng viên này đang có lớp học đảm nhiệm, không thể xoá!'
+            //     ],403);
             // }
 
             $teacher->delete();
-            DB::commit();
+
             return response()->json([
                 'status' => true,
                 'message' => 'Xóa giảng viên thành công!'
             ], 200);
         } catch (\Throwable $th) {
-            DB::rollback();
+
             return $this->handleErrorNotDefine($th);
+        }
+    }
+
+    public function updateActive(string $userCode)
+    {
+        try {
+            $listTeacher = User::where('user_code', $userCode)->firstOrFail();
+            // dd(!$listTeacher->is_active);
+            $listTeacher->update([
+                'is_active' => !$listTeacher->is_active
+            ]);
+            $listTeacher->save();
+            return response()->json([
+                'message' => 'Cập nhật thành công',
+                'error' => false
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
+
+            return response()->json([
+                'message' => 'Lỗi không xác định',
+                'error' => true
+            ], 500);
         }
     }
 }

@@ -47,7 +47,7 @@ class AttendanceController extends Controller
                                 $query->select('subject_code', 'subject_name', 'semester_code');
 
                             }, 'classroom.teacher' => function ($query) {
-                                $query->select('user_code', 'full_name');
+                                $query->select('user_code', 'full_name')->withTrashed();
 
                             },'classroom.schedules' => function ($query) {
                                 $query->select('date', 'room_code', 'class_code', 'session_code')

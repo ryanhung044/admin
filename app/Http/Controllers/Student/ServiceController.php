@@ -296,8 +296,8 @@ class ServiceController extends Controller
         'sex'           => 'nullable|string|in:Nam,Nữ',
         'date_of_birth' => 'nullable|date',
         'address'       => 'nullable|string|max:255',
-        'id_number'     => 'nullable|string|max:20',
-        'note'          => 'nullable|string|max:500',
+        'citizen_card_number'  => 'nullable|string|max:20',
+        'note'                  => 'nullable|string|max:500',
       ]);
 
       $user_code = $request->user()->user_code;

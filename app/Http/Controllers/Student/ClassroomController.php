@@ -43,17 +43,13 @@ class ClassroomController extends Controller
 
                             },
                             'teacher' => function($query) {
-                                $query->select('user_code', 'full_name');
+                                $query->select('user_code', 'full_name')->withTrashed();
                                 
                             },
-                            'schedules.room' => function($query) {
-                                $query->select('cate_code', 'cate_name', 'value');
-                                
-                            },
-                            'schedules.session' => function($query) {
-                                $query->select('cate_code', 'cate_name', 'value');
-                                
-                            }])->get(['class_code', 'class_name', 'user_code', 'is_active', 'subject_code']);
+                            'schedules.room:cate_code,cate_name,value',
+                            'schedules.session:cate_code,cate_name,value',
+
+                            ])->get(['class_code', 'class_name', 'user_code', 'is_active', 'subject_code']);
             $result = $classrooms->map(function($classroom) {
                 $schedules_first = optional($classroom->schedules->first());
                 $student = optional($classroom->users);
@@ -107,18 +103,12 @@ class ClassroomController extends Controller
             $student_code = request()->user()->user_code;
 
             $classroom_user = ClassroomUser::with([
-                'classroom' => function ($query) {
-                    $query->select('class_code', 'class_name', 'is_active', 'subject_code', 'user_code');
-                },
-                'classroom.subject' => function ($query) {
-                    $query->select('subject_code', 'subject_name');
-                },
+                'classroom:class_code,class_name,is_active,subject_code,user_code',
+                'classroom.subject:subject_code,subject_name',
                 'classroom.teacher' => function ($query) {
-                    $query->select('user_code', 'full_name', 'email', 'major_code');
+                    $query->select('user_code', 'full_name', 'email', 'major_code')->withTrashed();
                 },
-                'classroom.teacher.major' => function ($query) {
-                    $query->select('cate_code', 'cate_name');
-                }
+                'classroom.teacher.major:cate_code,cate_name',
             ])->where([
                 'user_code' => $student_code,
                 'class_code' => $class_code

@@ -27,12 +27,19 @@ class FeeController extends Controller
     public function index(Request $request)
     {
         try {
-            $status = $request['status'];
-            $email  = $request['email'];
-            $data = $this->feeRepository->getAll($email, $status);
+            $status = $request->input('status');
+            $email = $request->input('email');
+            $search = $request->input('search'); 
+            $orderBy = $request->input('orderBy', 'created_at'); // Nếu không có orderBy, mặc định là 'created_at'
+            $orderBy === 'user' ? ($orderBy = 'user_code') : $orderBy; 
+            $orderDirection = $request->input('orderDirection', 'asc'); // Mặc định sắp xếp theo hướng 'asc'
+    
+            $data = $this->feeRepository->getAll($email, $status, $search, $orderBy, $orderDirection);
+            
+    
             return response()->json($data);
         } catch (Throwable $th) {
-            return response()->json(['message' => $th], 404);
+            return response()->json(['message' => $th->getMessage()], 404);
         }
     }
 
