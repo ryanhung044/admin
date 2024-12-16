@@ -60,14 +60,16 @@ class SubjectController extends Controller
         }
     }   
 
-    public function store(StoreSubjectRequest $request)
+    public function store(Request $request)
     {
         try {
             // Lấy mã môn học mới nhất và tạo subject_code mới
             $newestSubjectCode = Subject::withTrashed()
                 ->where('major_code', 'LIKE', $request['major_code'])
+                ->where('subject_code', 'LIKE', $request['major_code'] . '%')
                 ->selectRaw("MAX(CAST(SUBSTRING(subject_code, 4) AS UNSIGNED)) as max_number")
                 ->value('max_number');
+                // return response()->json($newestSubjectCode, 500);
             $nextNumber = $newestSubjectCode ? $newestSubjectCode + 1 : 1;
 
             $newSubjectCode = $request['major_code'] . str_pad($nextNumber, 2, '0', STR_PAD_LEFT);
