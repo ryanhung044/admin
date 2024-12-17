@@ -28,7 +28,7 @@ class UpdateSemesterCommand extends Command
     public function handle()
     {
         $students = User::where('role', '3')->where('is_active', true)
-            ->select('semester_code', 'user_code')
+            ->select('semester_code', 'user_code','id')
             ->get();
         foreach ($students as $student) {
             $currentSemester = DB::table('categories')
