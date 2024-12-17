@@ -53,7 +53,7 @@ class UsersTableSeeder extends Seeder
         $middleNames = ['Văn', 'Thị', 'Hữu', 'Minh', 'Quang', 'Ngọc', 'Gia', 'Anh', 'Thanh', 'Tuấn'];
         $firstNames = ['Hưng', 'Hạnh', 'Dũng', 'Trang', 'Hải', 'Linh', 'Tuấn', 'Lan', 'Thảo', 'Nam'];
 
-        for ($i = 102; $i <= 200; $i++) {
+        for ($i = 201; $i <= 300; $i++) {
             // Tạo tên thật ngẫu nhiên
             $fullName = $lastNames[array_rand($lastNames)] . ' '
                 . $middleNames[array_rand($middleNames)] . ' '
@@ -77,7 +77,7 @@ class UsersTableSeeder extends Seeder
                 'role' => '2', // Quyền teacher
                 'is_active' => 1,
                 'major_code' => 'ALL',
-                'narrow_major_code' => ['ALL_ENT', 'ALL_PTCN'][rand(0, 1)],
+                'narrow_major_code' => ['ALL_VIE', 'ALL_POL'][rand(0, 1)],
                 'remember_token' => Str::random(10),
                 'deleted_at' => null,
                 'created_at' => Carbon::now(),
