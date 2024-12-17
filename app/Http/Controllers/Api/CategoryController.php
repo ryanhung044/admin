@@ -1270,7 +1270,7 @@ class CategoryController extends Controller
             // Lấy danh sách sinh viên trong lớp của lịch học
             $students = DB::table('classroom_user')
                 ->where('class_code', $schedule->class_code)
-                ->whereDate('created_at', now())
+                // ->whereDate('created_at', now())
                 ->get();
 
             foreach ($students as $student) {
@@ -1281,7 +1281,7 @@ class CategoryController extends Controller
                     'date' => $schedule->date,
                     'status' => 'present', // Trạng thái mặc định
                     'noted' => null,
-                    'created_at' => now(),
+                    'created_at' => '2020-08-31 01:03:01',
                     'updated_at' => now(),
                 ]);
             }
