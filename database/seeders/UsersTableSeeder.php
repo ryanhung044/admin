@@ -21,7 +21,7 @@ class UsersTableSeeder extends Seeder
         $firstNames = ['Sơn', 'Hoài', 'Khánh', 'Tú', 'Vũ', 'Nhung', 'Mai', 'Nhật', 'Mỹ', 'Quyên'];
 
 
-        for ($i = 301 ; $i < 400 ; $i++) {
+        for ($i = 305 ; $i < 400 ; $i++) {
             $fullName = $lastNames[array_rand($lastNames)] . ' '
                 . $middleNames[array_rand($middleNames)] . ' '
                 . $firstNames[array_rand($firstNames)];
