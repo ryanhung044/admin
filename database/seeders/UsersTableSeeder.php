@@ -16,9 +16,10 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ'];
-        $middleNames = ['Văn', 'Thị', 'Hữu', 'Minh', 'Quang', 'Ngọc', 'Gia', 'Anh', 'Thanh', 'Tuấn'];
-        $firstNames = ['Hưng', 'Hạnh', 'Dũng', 'Trang', 'Hải', 'Linh', 'Tuấn', 'Lan', 'Thảo', 'Nam'];
+        $lastNames = ['Lý', 'Phan', 'Đoàn', 'Ngô', 'Bảo', 'Hà', 'Cao', 'Dương', 'Trịnh', 'Mai'];
+        $middleNames = ['Hồng', 'Kim', 'Tuệ', 'Thanh', 'Cẩm', 'Phương', 'Thùy', 'Vân', 'Lan', 'Minh'];
+        $firstNames = ['Sơn', 'Hoài', 'Khánh', 'Tú', 'Vũ', 'Nhung', 'Mai', 'Nhật', 'Mỹ', 'Quyên'];
+
 
         for ($i = 301 ; $i < 400 ; $i++) {
             $fullName = $lastNames[array_rand($lastNames)] . ' '
