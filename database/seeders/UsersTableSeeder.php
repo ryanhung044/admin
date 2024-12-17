@@ -77,7 +77,7 @@ class UsersTableSeeder extends Seeder
                 'role' => '2', // Quyền teacher
                 'is_active' => 1,
                 'major_code' => 'ALL',
-                'narrow_major_code' => ['ALL_TN'][rand(0, 1)],
+                'narrow_major_code' => "ALL_TN",
                 'remember_token' => Str::random(10),
                 'deleted_at' => null,
                 'created_at' => Carbon::now(),
