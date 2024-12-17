@@ -27,6 +27,8 @@ class FeeController extends Controller
     public function index(Request $request)
     {
         try {
+            $perPage = $request->input('per_page', 10);
+            $search = $request->input('search'); // Lấy từ khóa tìm kiếm từ request
             $status = $request->input('status');
             $email = $request->input('email');
             $search = $request->input('search'); 
@@ -34,7 +36,7 @@ class FeeController extends Controller
             $orderBy === 'user' ? ($orderBy = 'user_code') : $orderBy; 
             $orderDirection = $request->input('orderDirection', 'asc'); // Mặc định sắp xếp theo hướng 'asc'
     
-            $data = $this->feeRepository->getAll($email, $status, $search, $orderBy, $orderDirection);
+            $data = $this->feeRepository->getAll($email, $status, $search, $orderBy, $orderDirection,$perPage);
             
     
             return response()->json($data);
@@ -99,9 +101,9 @@ class FeeController extends Controller
     public function update(Request $request, Fee $fee)
     {
         // return $request;
-        // DB::beginTransaction();
+        DB::beginTransaction();
         $fee->status = $request['status'];
-        // try {
+        try {
             $isFullyPaid = $request['status'] == 'paid';
 
             if ($isFullyPaid) {
@@ -140,11 +142,11 @@ class FeeController extends Controller
                 'data' => $fee,
             ], 200);
             // Logic xử lý
-            // DB::commit();
-        // } catch (\Exception $e) {
-        //     // DB::rollBack();
-        //     return response()->json(['error' => 'Something went wrong!'], 500);
-        // }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Something went wrong!'], 500);
+        }
     }
 
 

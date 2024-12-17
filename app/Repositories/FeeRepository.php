@@ -14,7 +14,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 class FeeRepository implements FeeRepositoryInterface {
-   public function getAll($email = null, $status = null, $search = null, $orderBy = 'created_at', $orderDirection = 'desc')
+   public function getAll($email = null, $status = null, $search = null, $orderBy = 'created_at', $orderDirection = 'desc',$perPage = 10)
     {
         $data = Fee::query()->with(['user' => function ($query) {
             $query->select('id', 'user_code', 'full_name', 'email', 'phone_number');
@@ -47,7 +47,7 @@ class FeeRepository implements FeeRepositoryInterface {
         }
         $data->orderBy($orderBy, $orderDirection);
     
-            return $data->paginate(20);
+            return $data->paginate($perPage);
     }
     // public function createAll(){
 

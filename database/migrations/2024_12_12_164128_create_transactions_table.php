@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('amount_paid',12,2);
             $table->enum('payment_method',['transfer','cash']);
             $table->enum('type', ['add','deduct']);
-            $table->string('receipt_number')->unique();
+            $table->string('receipt_number');
             $table->boolean('is_deposit')->default(true);
             $table->timestamps();
         });
