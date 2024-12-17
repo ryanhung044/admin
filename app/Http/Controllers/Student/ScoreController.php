@@ -151,6 +151,7 @@ class ScoreController extends Controller
                 $allSubjects = collect($subjectsMajor)->merge($subjectsNarrowMajor);
 
                 foreach ($allSubjects as $subject) {
+                    return $subject;
                     $subjectCode = $subject->subject_code;
 
                     if ($scoresMap->has($subjectCode)) {
