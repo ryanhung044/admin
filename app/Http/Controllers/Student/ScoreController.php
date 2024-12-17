@@ -135,10 +135,11 @@ class ScoreController extends Controller
                         ->get(['user_code', 'major_code', 'narrow_major_code', 'semester_code']);
 
             $result = $listSubject->map(function ($user) {
+                return $user;
                 $userSemesterCode = $user->semester_code; 
                 $subjectsMajor = $user->subjectMajor;
                 $subjectsNarrowMajor = $user->subjectNarrowMajor;
-                return $scores = $user->scores;
+                 $scores = $user->scores;
                 $major = $user->major->cate_name;
                 $narrowMajor = $user->narrow_major->cate_name ?? null;
 
