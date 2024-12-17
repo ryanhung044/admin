@@ -121,8 +121,8 @@ class ScoreController extends Controller
                             },
                             'scores' => function ($query) {
                                 $query->select('subject_code', 'score', 'is_pass')
-                                    ->with('subject:subject_code,subject_name,credit_number,semester_code,major_code')
-                                    ->with(['subject.semester' => function ($query) {
+                                    ->with('Subject:subject_code,subject_name,credit_number,semester_code,major_code')
+                                    ->with(['Subject.semester' => function ($query) {
                                         $query->select('cate_code', 'cate_name');
                                     }]);
                             },
