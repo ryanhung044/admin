@@ -145,12 +145,12 @@ class User extends Authenticatable
 
     public function subjectMajor()
     {
-        return $this->belongsToMany(Subject::class, 'categories', 'major_code', 'subject_code');
+        return $this->belongsToMany(Subject::class, 'categories', 'major_code', 'major_code');
     }
 
     public function subjectNarrowMajor()
     {
-        return $this->belongsToMany(Subject::class, 'categories', 'narrow_major_code', 'subject_code');
+        return $this->belongsToMany(Subject::class, 'categories', 'narrow_major_code', 'major_code');
     }
 
 
