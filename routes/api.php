@@ -375,8 +375,8 @@ Route::get('total_momo/learn-again', [CheckoutLearnAgainController::class, 'momo
 Route::post('/forgot-password', [ForgetPasswordController::class, 'forgetPasswordPost']);
 Route::post('/reset-password', [ForgetPasswordController::class, 'resetPasswordPost']);
 
-Route::get('total_vnpay/service', [CheckoutServiceController::class, 'vnpay_payment']);
-Route::get('total_momo/service',        [CheckoutServiceController::class, 'momo_payment']);
+Route::get('total_vnpay/service',       [CheckoutServiceController::class,  'vnpay_payment']);
+Route::get('total_momo/service',        [CheckoutServiceController::class,  'momo_payment']);
 Route::get('return-vnpay', [CheckoutController::class, 'vnpay_payment_return']);
 
 

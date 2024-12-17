@@ -90,29 +90,7 @@ class TeacherController extends Controller
     public function store(StoreTeacherRequest $request)
     {
         
-        // try {
-        //     $data = $request->validated();
-
-        //     $newest_teacher_code = User::where('user_code', "LIKE", "TC%")
-        //     ->orderBy('user_code', 'desc')->pluck('user_code')->first();
-
-        //     $new_code = $newest_teacher_code ? (int) substr($newest_teacher_code, 2) : 0;
-        //     $new_teacher_code = "TC" . str_pad($new_code + 1, 5, 0, STR_PAD_LEFT);
-            
-        //     $data['user_code'] = $new_teacher_code;
-        //     $data['role'] = '2';
-        //     User::create($data);
-        //     
-
-        //     return response()->json([
-        //         'status' => true,
-        //         'message' => 'Thêm mới giảng viên thành công!'
-        //     ],201);
-        // } catch (\Throwable $th) {
-        //     
-        //     return $this->handleErrorNotDefine($th);
-        // }
-
+    
         try {
             $data = $request->validated();
             $newest_teacher_code = User::withTrashed()
@@ -210,7 +188,6 @@ class TeacherController extends Controller
                 'message' => 'Chỉnh sửa thông tin giảng viên thành công!'
             ],200);
         } catch (\Throwable $th) {
-
             return $this->handleErrorNotDefine($th);
         }
     }

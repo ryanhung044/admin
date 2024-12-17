@@ -35,6 +35,8 @@ class SubjectController extends Controller
         try {
             $perPage = $request->input('per_page', 10);
             $search = $request->input('search'); // Lấy từ khóa tìm kiếm từ request
+            $orderBy = $request->input('orderBy', 'created_at'); 
+            $orderDirection = $request->input('orderDirection', 'asc'); 
 
             $subjects = Subject::select('subject_code', 'subject_name', 'major_code', 'is_active')
                 ->with([
@@ -49,6 +51,7 @@ class SubjectController extends Controller
                             ->orWhere('major_code', 'like', "%{$search}%");
                     });
                 })
+                ->orderBy($orderBy, $orderDirection)
                 ->paginate($perPage);
 
             return response()->json([

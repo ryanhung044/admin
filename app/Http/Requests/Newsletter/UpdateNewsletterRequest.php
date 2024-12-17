@@ -44,6 +44,7 @@ class UpdateNewsletterRequest extends FormRequest
             // 'code.required' => 'Bạn chưa nhập mã bản tin',
             // 'code.regex' => 'Mã bản tin không chứa kí tự đặc biệt',
             // 'code.unique' => 'Mã bản tin đã được sử dụng',
+
             'title.required' => 'Bạn chưa nhập Title bản tin',
             'title.max' => 'Title bản tin không quá 255 kí tự',
             'title.regex' => 'Title bản tin không chứa kí tự đặc biệt',

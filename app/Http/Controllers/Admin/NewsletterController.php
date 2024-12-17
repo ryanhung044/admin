@@ -49,7 +49,10 @@ class NewsletterController extends Controller
     
             $title = $request->input('title');
             $type = $request->input('type');
-            $perPage = $request->input('per_page', 10); // Số lượng phần tử mỗi trang, mặc định là 10.
+            $perPage = $request->input('per_page', 10);
+            $search = $request->input('search');
+            $orderBy = $request->input('orderBy', 'created_at'); 
+            $orderDirection = $request->input('orderDirection', 'asc'); 
     
             // Sử dụng paginate thay vì get()
             $newsletters = Newsletter::with(['category', 'user'])
@@ -59,7 +62,9 @@ class NewsletterController extends Controller
                 ->when($type !== null, function ($query) use ($type) {
                     return $query->where('type', '=', $type);
                 })
+                ->orderBy($orderBy, $orderDirection)
                 ->paginate($perPage); // Phân trang
+                
     
             // Map dữ liệu cho từng phần tử
             $mappedNewsletters = $newsletters->getCollection()->map(function ($newsletter) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangeInfoRequest;
 use App\Mail\SendEmailFeeService;
 use App\Mail\ServiceStatusChanged;
 use Illuminate\Support\Str;
@@ -79,7 +80,7 @@ class ServiceController extends Controller
   public function getAllServicesByStudent(Request $request)
   {
     try {
-      // Assuming user_code is dynamically retrieved from the authenticated user
+
       $user_code = request()->user()->user_code;
 
       $data = Service::query()->where('user_code', $user_code);
@@ -170,24 +171,23 @@ class ServiceController extends Controller
   public function changeStatus(int $id, Request $request)
   {
     try {
-
       $status = $request->input('status');
       $reason = $request->input('reason', null);
-
       if (!in_array($status, ['approved', 'rejected'])) {
-        return response()->json(['message' => 'Trạng thái không hợp lệ']);
+        return response()->json(['message' => 'Trạng thái không hợp lệ'],400);
       }
 
       $service = Service::findOrFail($id);  // Lấy dịch vụ
+      if($service->status == 'approved' || $service->status == 'rejected'){
+            return response()->json(['message' => "Không được thay đổi trạng thái khi đã duyệt hoặc hủy"]);
+      }
 
       $service->update([
         'status' => $status,
         'reason' => $reason
       ]);
-
       // Lấy thông tin người dùng liên quan đến dịch vụ
       $user = User::where('user_code', $service->user_code)->firstOrFail();
-
       // Dữ liệu cần gửi vào email
       $data = [
         "full_name" => $user->full_name,
@@ -199,9 +199,14 @@ class ServiceController extends Controller
 
       Mail::to($user->email)->send(new ServiceStatusChanged($data));
 
-      return response()->json(['message' => "Đã gửi email thành công", 'reason' => $reason]);
+      return response()->json([
+        'success' => true,
+        'message' => "Đã gửi email thành công",
+        'data' => ['reason' => $reason]
+    ]);
     } catch (\Throwable $th) {
-      return response()->json(['message' => $th->getMessage()]);
+        Log::error('Error in changeStatus: ' . $th->getMessage());
+        return response()->json(['message' => 'Có lỗi xảy ra, vui lòng thử lại sau'], 500);
     }
   }
 
@@ -289,62 +294,72 @@ class ServiceController extends Controller
     }
   }
 
-  public function changeInfo(Request $request)
-  {
+  public function changeInfo(ChangeInfoRequest $request)
+{
     try {
-      $validatedData = $request->validate([
-        'full_name'     => 'nullable|string|max:255',
-        'sex'           => 'nullable|string|in:Nam,Nữ',
-        'date_of_birth' => 'nullable|date',
-        'address'       => 'nullable|string|max:255',
-        'citizen_card_number'  => 'nullable|string|max:20',
-        'note'                  => 'nullable|string|max:500',
+        // Lấy dữ liệu đã validate từ ChangeInfoRequest
+        $validatedData = $request->validated();
 
-      ]);
+        // Lấy user_code của người dùng hiện tại
+        $user_code = $request->user()->user_code;
+        if (!$user_code) {
+            return response()->json(['message' => 'Không tìm thấy user_code'], 404);
+        }
 
-      $user_code = $request->user()->user_code;
-      if (!$user_code) {
-        return response()->json(['message' => 'không tìm thấy user_code']);
-      }
+        $service_name = "Đăng kí thay đổi thông tin";
 
-      $service_name = "Đăng kí thay đổi thông tin";
-      $content = "";
+        $existingService = Service::where('user_code', $user_code)
+            ->where('service_name', $service_name)
+            ->first();
 
-      if (!empty($validatedData['full_name'])) {
-        $content .= "Họ và tên mới: {$validatedData['full_name']} \n";
-      }
 
-      if (!empty($validatedData['sex'])) {
-        $content .= "Giới tính mới: {$validatedData['sex']} \n";
-      }
+        if ($existingService && $existingService->status == 'pending') {
+            return response()->json(['message' => 'Yêu cầu thay đổi thông tin đã tồn tại. Vui lòng chờ xử lý.'], 409);
+        }
 
-      if (!empty($validatedData['date_of_birth'])) {
-        $content .= "Ngày sinh mới: {$validatedData['date_of_birth']} \n";
-      }
 
-      if (!empty($validatedData['address'])) {
-        $content .= "Địa chỉ mới: {$validatedData['address']} \n";
-      }
+        $content = "";
 
-      if (!empty($validatedData['id_number'])) {
-        $content .= "Số CMND/CCCD mới: {$validatedData['citizen_card_number']} \n";
-      }
+        if (!empty($validatedData['full_name'])) {
+            $content .= "Họ và tên mới: {$validatedData['full_name']} \n";
+        }
 
-      if (!empty($validatedData['note'])) {
-        $content .= "Ghi chú: {$validatedData['note']} \n";
-      }
-      $data = [
-        'user_code'     => $user_code,
-        'service_name'  => $service_name,
-        'content'       => $content,
-      ];
+        if (!empty($validatedData['sex'])) {
+            $content .= "Giới tính mới: {$validatedData['sex']} \n";
+        }
 
-      $service = Service::create($data);
-      return response()->json(['message' => 'gửi dịch vụ thành công', 'service' => $service]);
+        if (!empty($validatedData['date_of_birth'])) {
+            $content .= "Ngày sinh mới: {$validatedData['date_of_birth']} \n";
+        }
+
+        if (!empty($validatedData['address'])) {
+            $content .= "Địa chỉ mới: {$validatedData['address']} \n";
+        }
+
+        if (!empty($validatedData['citizen_card_number'])) {
+            $content .= "Số CMND/CCCD mới: {$validatedData['citizen_card_number']} \n";
+        }
+
+        if (!empty($validatedData['note'])) {
+            $content .= "Ghi chú: {$validatedData['note']} \n";
+        }
+
+        // Tạo dữ liệu dịch vụ mới
+        $data = [
+            'user_code'    => $user_code,
+            'service_name' => $service_name,
+            'content'      => $content,
+        ];
+
+        $service = Service::create($data);
+
+        return response()->json(['message' => 'Gửi dịch vụ thành công', 'service' => $service], 201);
+
     } catch (\Throwable $th) {
-      return response()->json(['message' => $th->getMessage()]);
+        return response()->json(['message' => $th->getMessage()], 500);
     }
-  }
+}
+
   public function provideStudentCard(string $user_code, Request $request)
   {
     try {

@@ -37,6 +37,11 @@ class ScheduleController extends Controller
     {
 
         try {
+            // $perPage = $request->input('per_page', 10);
+            // $search = $request->input('search');
+            // $orderBy = $request->input('orderBy', 'created_at'); 
+            // $orderDirection = $request->input('orderDirection', 'asc'); 
+
             $today = Carbon::today();
             $sevenDaysLater = Carbon::today()->addDays(7);
 
@@ -57,6 +62,8 @@ class ScheduleController extends Controller
                 ->where('type', 'study')
                 ->where('teacher_code', $userCode)
                 ->get();
+                // ->orderBy($orderBy, $orderDirection)
+                // ->paginate($perPage);
 
             return response()->json($list_schedules, 200);
         } catch (\Throwable $th) {
@@ -117,19 +124,69 @@ class ScheduleController extends Controller
 
     public function listSchedulesForTeacher(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
         try {
+            // Lấy các tham số từ request
+            $perPage = $request->input('per_page', 10);
+            $search = $request->input('search');
+            $orderBy = $request->input('orderBy', 'date'); 
+            $orderDirection = $request->input('orderDirection', 'asc'); 
             $teacher_code = request()->user()->user_code;
+    
+            // Lấy thời gian hiện tại và thời gian 7 ngày sau
             $now = Carbon::now('Asia/Ho_Chi_Minh')->startOfDay();
             $sevenDaysLater = $now->clone()->addDays(7)->endOfDay();
-
+    
+            // Lấy danh sách lịch học cho giảng viên
             $list_schedules = Schedule::with(['classroom.subject', 'session', 'classroom'])
+                // ->withCount('classroom.users as users_count')
                 ->where('teacher_code', $teacher_code)
-                ->whereBetween('date', [$now, $sevenDaysLater])
-                ->orderBy('date', 'asc')
-                ->paginate($perPage);
-
-            $schedules = $list_schedules->map(function ($schedule) {
+                ->whereBetween('date', [$now, $sevenDaysLater]);
+    
+            // Nếu có tham số tìm kiếm (search), thêm vào điều kiện tìm kiếm
+            if ($search) {
+                $list_schedules->where(function ($query) use ($search) {
+                    $query->where('schedules.class_code', 'LIKE', "%$search%") // Chỉ định rõ bảng schedules
+                          ->orWhere('schedules.room_code', 'LIKE', "%$search%") // Chỉ định rõ bảng schedules
+                          ->orWhere('schedules.date', 'LIKE', "%$search%") // Chỉ định rõ bảng schedules
+                          ->orWhereHas('classroom.subject', function ($q) use ($search) {
+                              $q->where('subjects.subject_name', 'LIKE', "%$search%") // Chỉ định rõ bảng subjects
+                                ->orWhere('subjects.subject_code', 'LIKE', "%$search%"); // Chỉ định rõ bảng subjects
+                          })
+                          ->orWhereHas('session', function ($q) use ($search) {
+                              $q->where('categories.cate_name', 'LIKE', "%$search%"); // Chỉ định rõ bảng categories
+                          })
+                        //   ->orWhereHas('classroom.users', function ($q) use ($search) {
+                        //     $q->whereRaw("COUNT(users.id) LIKE ?", ["%$search%"]); // Sửa câu lệnh COUNT thành phù hợp với logic
+                        // });
+                          ;
+                });
+                // $list_schedules->orHaving('users_count', 'LIKE', "%$search%");
+            }
+            // Sắp xếp theo các trường khác nhau
+            if ($orderBy == 'subject_code') {
+                $list_schedules->join('classrooms', 'schedules.class_code', '=', 'classrooms.class_code')
+                           ->join('subjects', 'classrooms.subject_code', '=', 'subjects.subject_code')
+                           ->orderBy('subjects.subject_code', $orderDirection);
+            } elseif ($orderBy == 'session_name' || $orderBy == 'session') {
+                $list_schedules->join('categories', 'schedules.session_code', '=', 'categories.cate_code')
+                               ->orderBy('categories.cate_name', $orderDirection);
+            } elseif ($orderBy == 'count_users') {
+                $list_schedules->withCount('users as users_count') // Tính số lượng users
+                               ->orderBy('users_count', $orderDirection);
+            } else if ($orderBy == 'subject_name') {
+                $list_schedules->join('classrooms', 'schedules.class_code', '=', 'classrooms.class_code')
+                            ->join('subjects', 'classrooms.subject_code', '=', 'subjects.subject_code')
+                            ->orderBy('subjects.subject_name', $orderDirection);
+            } else {
+                // Các trường hợp sắp xếp khác
+                $list_schedules->orderBy($orderBy, $orderDirection);
+            }
+    
+            // Áp dụng phân trang sau khi đã sắp xếp
+            $list_schedules = $list_schedules->paginate($perPage);
+    
+            // Chuyển đổi dữ liệu theo yêu cầu
+            $schedules = $list_schedules->getCollection()->map(function ($schedule) {
                 return [
                     'class_code'    => $schedule->classroom->class_code,
                     'date'          => $schedule->date,
@@ -139,15 +196,21 @@ class ScheduleController extends Controller
                     'session'       => $schedule->session->value,
                     'session_code'  => $schedule->session->cate_code,
                     'session_name'  => $schedule->session->cate_name,
-                    'count_users'   => $schedule->classroom?->users->count() ?? 0,
+                    'count_users'   => $schedule->classroom->users->count() ?? 0,
+                    'session_start' => $schedule->session->start,
                 ];
             });
+    
+            // Đặt lại collection đã chuyển đổi vào paginate
             $list_schedules->setCollection($schedules);
+    
+            // Trả về kết quả
             return response()->json($list_schedules, 200);
         } catch (\Throwable $th) {
             return $this->handleErrorNotDefine($th);
         }
     }
+    
 
     public function listSchedulesForStudent(Request $request)
     {

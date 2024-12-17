@@ -66,7 +66,7 @@ class ClassroomController extends Controller
             $orderBy = $request->input('orderBy', 'created_at');
             $orderDirection = $request->input('orderDirection', 'asc');
     
-            $classrooms = Classroom::select(['classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code'])
+            $classrooms = Classroom::select(['classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'classrooms.is_active'])
                 ->when($search, function($query) use ($search) {
                     $query->where('classrooms.class_code', "LIKE", "%$search%")
                         ->orWhere('classrooms.class_name', "LIKE", "%$search%")
@@ -101,34 +101,34 @@ class ClassroomController extends Controller
                         $query->select('cate_code', 'cate_name');
                     }
                 ]);
-            // Sắp xếp theo các trường liên quan đến quan hệ
-            switch ($orderBy) {
-                case 'subject_name':
-                    $classrooms->join('subjects', 'classrooms.subject_code', '=', 'subjects.subject_code');
-                    $classrooms->orderBy('subjects.subject_name', $orderDirection);
-                    break;
-                case 'teacher_name':
-                    $classrooms->join('users as teacher', 'classrooms.user_code', '=', 'teacher.user_code') // Nối với bảng 'users' cho giáo viên
-                                ->orderBy('teacher.full_name', $orderDirection);
-                    break;
-                case 'students_count':
-                    $classrooms->withCount('users') // Đếm số lượng sinh viên
-                                ->orderBy('users_count', $orderDirection);
-                    break;
-                case 'session_name':
-                    // Lấy bản ghi đầu tiên từ bảng schedules và join với bảng sessions
-                    $classrooms->join('schedules', 'classrooms.class_code', '=', 'schedules.class_code')
-                    ->join('categories', 'schedules.session_code', '=', 'categories.cate_code')
-                    ->select('classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'categories.cate_name')
-                    ->groupBy('classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'categories.cate_name')
-                    ->orderBy('categories.cate_name', $orderDirection);
+            // // Sắp xếp theo các trường liên quan đến quan hệ
+            // switch ($orderBy) {
+            //     case 'subject_name':
+            //         $classrooms->join('subjects', 'classrooms.subject_code', '=', 'subjects.subject_code');
+            //         $classrooms->orderBy('subjects.subject_name', $orderDirection);
+            //         break;
+            //     case 'teacher_name':
+            //         $classrooms->join('users as teacher', 'classrooms.user_code', '=', 'teacher.user_code') // Nối với bảng 'users' cho giáo viên
+            //                     ->orderBy('teacher.full_name', $orderDirection);
+            //         break;
+            //     case 'students_count':
+            //         $classrooms->withCount('users') // Đếm số lượng sinh viên
+            //                     ->orderBy('users_count', $orderDirection);
+            //         break;
+            //     case 'session_name':
+            //         // Lấy bản ghi đầu tiên từ bảng schedules và join với bảng sessions
+            //         $classrooms->join('schedules', 'classrooms.class_code', '=', 'schedules.class_code')
+            //         ->join('categories', 'schedules.session_code', '=', 'categories.cate_code')
+            //         ->select('classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'categories.cate_name')
+            //         ->groupBy('classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'categories.cate_name')
+            //         ->orderBy('categories.cate_name', $orderDirection);
                 
-                    break;
+            //         break;
             
-                default:
-                    $classrooms->orderBy($orderBy, $orderDirection); // Nếu không phải trường hợp cụ thể nào, sắp xếp theo trường được chỉ định
-                    break;
-            }
+            //     default:
+            //         $classrooms->orderBy($orderBy, $orderDirection); // Nếu không phải trường hợp cụ thể nào, sắp xếp theo trường được chỉ định
+            //         break;
+            // }
     
             // Lấy dữ liệu phân trang
             $classrooms = $classrooms->paginate($perPage);
@@ -190,9 +190,10 @@ class ClassroomController extends Controller
             $student_codes_has_been_arrange = ClassroomUser::whereIn('class_code', $classroom_codes)->pluck('user_code');
             // Lấy ra tổng số học sinh có thể được tạo lớp mới với môn học này + khoá học này
             $count_students_can_be_arrange = User::whereNotIn('user_code', $student_codes_has_been_arrange)
-                ->where([
+            ->where('major_code', $data['major_code'])
+            ->orWhere('narrow_major_code', $data['major_code'])    
+            ->where([
                     'course_code' => $data['course_code'],
-                    'major_code' => $data['major_code'],
                     'semester_code' => $data['semester_code'],
                     'is_active' => true,
                     'role' => '3'
@@ -390,7 +391,6 @@ class ClassroomController extends Controller
             $data = $request->validated();
             $current_classcode = Classroom::where('class_code', 'LIKE', $data['course_code'] . '.' . $data['subject_code'] . "%")
                 ->orderBy('class_code', 'desc')->pluck('class_code')->first();
-
             $number = 1;
 
             if ($current_classcode) {

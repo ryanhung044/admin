@@ -77,7 +77,7 @@
     </a>
     <br>
     <br>
-    <a href="https://admin.feduvn.com/api/service?id={{$data['id']}}&user_code={{$data['user_code']}}">
+    <a href="https://admin.feduvn.com/api/total_vnpay/service?id={{$data['id']}}&user_code={{$data['user_code']}}">
         Thanh toán VNPAY
     </a>
 
