@@ -108,7 +108,7 @@ class ScoreController extends Controller
     {
         try {
             $userCode = $request->user()->user_code;
-            return $listSubject = User::where('user_code', $userCode)
+            $listSubject = User::where('user_code', $userCode)
                         ->with([
                             'subjectMajor' => function ($query) {
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
