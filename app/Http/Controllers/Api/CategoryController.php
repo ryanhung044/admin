@@ -1270,6 +1270,7 @@ class CategoryController extends Controller
             // Lấy danh sách sinh viên trong lớp của lịch học
             $students = DB::table('classroom_user')
                 ->where('class_code', $schedule->class_code)
+                ->whereDate('created_at',now())
                 ->get();
 
             foreach ($students as $student) {
