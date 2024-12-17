@@ -59,6 +59,9 @@ class StudentController extends Controller
                 'major' => function ($query) {
                     $query->select('cate_code', 'cate_name', 'parent_code');
                 },
+                'narrow_major' => function($query){
+                    $query->select('cate_code' ,'cate_name', 'parent_code');
+                },
                 'semester' => function ($query) {
                     $query->select('cate_code', 'cate_name');
                 },
@@ -224,14 +227,11 @@ class StudentController extends Controller
     {
 
         try {
-
-
             $student = User::where('user_code', $user_code)->first();
 
             if (!$student) {
                 return $this->handleInvalidId();
             }
-
             $student->delete();
 
 

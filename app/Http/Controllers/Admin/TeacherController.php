@@ -123,7 +123,10 @@ class TeacherController extends Controller
             $teacher = User::with([
                 'major' => function ($query) {
                     $query->select('cate_code', 'cate_name');
-                }
+                },
+                'narrow_major' => function($query){
+                    $query->select('cate_code' ,'cate_name', 'parent_code');
+                },
             ])->where('user_code', $teacher_code)
                 ->select(
                     'user_code',

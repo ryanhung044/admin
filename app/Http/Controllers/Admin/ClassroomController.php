@@ -67,6 +67,8 @@ class ClassroomController extends Controller
             $orderDirection = $request->input('orderDirection', 'asc');
     
             $classrooms = Classroom::select(['classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'classrooms.is_active'])
+            ->where('classrooms.is_active',true)
+
                 ->when($search, function($query) use ($search) {
                     $query->where('classrooms.class_code', "LIKE", "%$search%")
                         ->orWhere('classrooms.class_name', "LIKE", "%$search%")
@@ -160,13 +162,6 @@ class ClassroomController extends Controller
                 ];
             });
     
-            // Kiểm tra nếu không có dữ liệu
-            if ($classrooms->isEmpty()) {
-                return response()->json(
-                    ['message' => "Không có lớp học nào!"],
-                    204
-                );
-            }
     
             return response()->json([
                 'status' => true,
@@ -184,23 +179,103 @@ class ClassroomController extends Controller
     {
         try {
             $data = $request->validated();
+            $subject = Subject::with('semester')->where('subject_code', $data['subject_code'])->first();
+
+            if (!$subject) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Môn học không tồn tại!'
+                ], 404);
+            }
             // Lấy ra danh sách các lớp học đã được tạo bởi môn học này + khoá học này
-             $classroom_codes = Classroom::where('class_code', 'LIKE', $data['course_code'] . '.' . $data['subject_code'] . '%')
-                ->select('class_code')->pluck('class_code');
+            //  $classroom_codes = Classroom::where('class_code', 'LIKE', $data['course_code'] . '.' . $data['subject_code'] . '%')
+            //     ->select('class_code')->pluck('class_code');
+
+                
             // Lấy ra danh sách các học sinh đã được xếp lớp cho môn học này + khoá học này 
-            $student_codes_has_been_arrange = ClassroomUser::whereIn('class_code', $classroom_codes)->pluck('user_code');
+            // $student_codes_has_been_arrange = ClassroomUser::whereIn('class_code', $classroom_codes)->pluck('user_code');
             // Lấy ra tổng số học sinh có thể được tạo lớp mới với môn học này + khoá học này
-            $count_students_can_be_arrange = User::whereNotIn('user_code', $student_codes_has_been_arrange)
-            ->where('major_code', $data['major_code'])
-            ->orWhere('narrow_major_code', $data['major_code'])    
-            ->where([
-                    'course_code' => $data['course_code'],
-                    'semester_code' => $data['semester_code'],
-                    'is_active' => true,
-                    'role' => '3'
-                ])
-                ->count();
-            return response()->json($count_students_can_be_arrange);
+            // $count_students_can_be_arrange = User::whereNotIn('user_code', $student_codes_has_been_arrange)
+            // ->where('major_code', $data['major_code'])
+            // ->orWhere('narrow_major_code', $data['major_code'])    
+            // ->where([
+            //         'course_code' => $data['course_code'],
+            //         'semester_code' => $data['semester_code'],
+            //         'is_active' => true,
+            //         'role' => '3'
+            //     ])->pluck('user_code');
+
+            // $student_codes_can_be_arrange  = [];
+// // Lấy các sinh viên chưa từng học môn này và đã đóng tiền cho kỳ có môn học này
+//              $student_codes_paid = Fee::where([
+//                 'status' => 'paid',
+//                 'semester_code' => $data['semester_code']
+//             ])->pluck('user_code')->toArray();
+
+//             $students_paid = User::whereIn('user_code', $student_codes_paid)->pluck('user_code')->toArray();
+// // Lấy ra các sinh viên đã đóng tiền học lại
+//             $student_codes_relearn = Score::where([
+//                 'subject_code' => $subject->subject_code,
+//                 'is_pass' => false,
+//                 'status' => true
+//             ])->pluck('student_code')->toArray();
+            
+//             $student_codes_can_be_arrange = array_unique(array_merge($student_codes_paid, $student_codes_relearn));
+//             $students_can_be_arrange = User::whereNotIn('user_code', $student_codes_has_been_studied)->whereIn('user_code', $student_codes_can_be_arrange)
+//                 ->where([
+//                     'role' => '3',
+//                     'is_active' => true,
+//                     'course_code' => $data['course_code'],
+//                     'semester_code' => $semester_code,
+//                 ])->where(function ($query) use ($data) {
+//                     $query->where('major_code', $data['major_code'])
+//                         ->orWhere('narrow_major_code', $data['major_code']);
+//                 })->select('user_code', 'full_name', 'email', 'sex')->limit($room_slot)->get();
+
+//             return response()->json($count_students_can_be_arrange);
+
+
+$classrooms_has_been_studied = Classroom::with('users')->where("class_code", "LIKE", $data['course_code'] . '.' . $data['subject_code'] . "%")->get();
+
+$student_codes_has_been_studied  = $classrooms_has_been_studied->flatMap(function ($classroom) {
+    return $classroom->users->pluck('user_code');
+});
+
+
+$student_codes_can_be_arrange  = [];
+// Lấy các sinh viên chưa từng học môn này và đã đóng tiền cho kỳ có môn học này
+ $student_codes_paid = Fee::where([
+    'status' => 'paid',
+    'semester_code' => $data['semester_code']
+])->pluck('user_code')->toArray();
+// Lấy ra các sinh viên đã đóng tiền học lại
+$student_codes_relearn = Score::where([
+    'subject_code' => $subject->subject_code,
+    'is_pass' => false,
+    'status' => true
+])->pluck('student_code')->toArray();
+
+$student_codes_can_be_arrange = array_unique(array_merge($student_codes_paid, $student_codes_relearn));
+$students_can_be_arrange = User::whereNotIn('user_code', $student_codes_has_been_studied)->whereIn('user_code', $student_codes_can_be_arrange)
+    ->where([
+        'role' => '3',
+        'is_active' => true,
+        'course_code' => $data['course_code'],
+        'semester_code' => $data['semester_code'],
+    ])->where(function ($query) use ($data) {
+        $query->where('major_code', $data['major_code'])
+            ->orWhere('narrow_major_code', $data['major_code']);
+    })->select('user_code', 'full_name', 'email', 'sex')->count();
+
+// if ($students_can_be_arrange->isEmpty()) {
+//     return response()->json([
+//         'status' => false,
+//         'message' => 'Không có sinh viên nào để tạo lớp học này!'
+//     ], 404);
+// }
+
+return response()->json($students_can_be_arrange);
+
         } catch (\Throwable $th) {
             return $this->handleErrorNotDefine($th);
         }
@@ -289,14 +364,14 @@ class ClassroomController extends Controller
             $teacher_codes_cannot_be_teach = $schedules->pluck('teacher.user_code')->unique();
 
             // Loại bỏ các giảng viên vừa tìm được để tìm ra các giảng viên có thể dạy 
-            $teachers_can_be_teach = User::whereNotIn('user_code', $teacher_codes_cannot_be_teach)
-                ->where([
+            $teachers_can_be_teach = User::whereNotIn('user_code', $teacher_codes_cannot_be_teach)    
+            ->where([
                     'is_active' => true,
-                    'major_code' => $data['major_code'],
                     'role' => '2'
-                ])->select('user_code', 'full_name')->limit(10)->get();
-
-
+                ])
+                ->where('major_code', $data['major_code'])
+                ->orWhere('narrow_major_code', $data['major_code'])
+                ->select('user_code', 'full_name')->limit(10)->get();
 
             return response()->json([
                 'status' => true,
@@ -404,14 +479,42 @@ class ClassroomController extends Controller
 
 
             if (!empty($data['teacher_code'])) {
-                $teacher_codes_valid = User::where('user_code', $data['teacher_code'])->pluck('user_code')->first();
-                if (!$teacher_codes_valid) {
+                $teacher = User::where('user_code', $data['teacher_code'])->first();
+                if (!$teacher) {
                     return response()->json([
                         'status' => false,
                         'message' => 'Giảng viên này không tồn tại!'
                     ], 404);
                 }
+
+                if($teacher->is_active == false){
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Giảng viên này hiện tại không thể tạo lớp!"
+                    ]);
+                }
+
+                $schedules = Schedule::with([
+                    'room' => function ($query) {
+                        $query->select('cate_code', 'cate_name', 'value');
+                    },
+                    'teacher' => function ($query) {
+                        $query->select('user_code');
+                    }
+                ])->whereHas('classroom', function($query)use ($data){
+                    $query->where('user_code', $data['teacher_code']);
+                })
+                ->whereIn('date', $data['list_study_dates'])
+                    ->where('session_code', $data['session_code'])->get();
+                    if($schedules->isEmpty()){
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Giảng viên này không thể dạy lớp học này!'
+                        ],409);
+                    }
             }
+
+
 
             $now = now();
 

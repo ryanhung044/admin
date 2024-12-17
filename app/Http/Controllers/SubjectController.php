@@ -49,6 +49,7 @@ class SubjectController extends Controller
                         $q->where('subject_code', 'like', "%{$search}%")
                             ->orWhere('subject_name', 'like', "%{$search}%")
                             ->orWhere('major_code', 'like', "%{$search}%");
+                            // ->orWhere('major_code', 'like', "%{$search}%");
                     });
                 })
                 ->orderBy($orderBy, $orderDirection)
