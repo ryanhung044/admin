@@ -1389,7 +1389,7 @@ class CategoryController extends Controller
     public function addStudent()
     {
         $classRooms = $this->getClassrooms(); // Lấy danh sách lớp học
-        return $majors = $this->getListByMajor();
+        $majors = $this->getListByMajor();
         $classroomStudentCounts = DB::table('classroom_user')
             ->select('class_code', DB::raw('COUNT(*) as current_count'))
             ->groupBy('class_code')
