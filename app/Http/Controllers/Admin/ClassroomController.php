@@ -506,7 +506,7 @@ return response()->json($students_can_be_arrange);
                 })
                 ->whereIn('date', $data['list_study_dates'])
                     ->where('session_code', $data['session_code'])->get();
-                    if($schedules->isEmpty()){
+                if($schedules->isEmpty()){
                         return response()->json([
                             'status' => false,
                             'message' => 'Giảng viên này không thể dạy lớp học này!'

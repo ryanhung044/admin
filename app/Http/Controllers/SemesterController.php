@@ -80,8 +80,15 @@ class SemesterController extends Controller
                 return response()->json(['message'=> 'không thể xóa kỳ học'],409);
             }
 
+
+
             $semester = Category::where('cate_code', $cate_code)
                                 ->where('type','semester')->firstOrFail();
+
+            $semesterExist = $semester->exists();
+            if($semesterExist){
+                return response()->json(['message' => 'Kỳ học đã tồn tại'],409);
+            }
 
             $semester->delete();
             return response()->json(['message' => 'xóa thành công']);

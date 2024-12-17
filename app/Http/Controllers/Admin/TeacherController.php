@@ -50,13 +50,27 @@ class TeacherController extends Controller
             $orderBy = $request->input('orderBy', 'created_at'); 
             $orderBy === $orderBy; 
             $orderDirection = $request->input('orderDirection', 'asc'); 
-            $teachers = User::where([
+            $teachers = User::with([
+                'major' => function ($query) {
+                    $query->select('cate_code', 'cate_name', 'parent_code');
+                },
+                'narrow_major' => function($query){
+                    $query->select('cate_code' ,'cate_name', 'parent_code');
+                }
+            ])->where([
                 'role' => '2'
             ])->when($search, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('user_code', 'LIKE', "%$search%")
                           ->orWhere('full_name', 'LIKE', "%$search%")
-                          ->orWhere('email', 'LIKE', "%$search%");
+                          ->orWhere('email', 'LIKE', "%$search%")
+                          ;
+                }) ->orWhereHas('major', function ($subQuery) use ($search) {
+                    $subQuery->where('cate_name', 'LIKE', "%$search%");
+                })
+                // Search trong quan hệ 'narrow_major'
+                ->orWhereHas('narrow_major', function ($subQuery) use ($search) {
+                    $subQuery->where('cate_name', 'LIKE', "%$search%");
                 });
             })
             ->select(
@@ -66,6 +80,8 @@ class TeacherController extends Controller
                 'sex',
                 'is_active',
                 'deleted_at',
+                'major_code',
+                'narrow_major_code'
             )->withTrashed()
             ->orderBy($orderBy, $orderDirection)
             ->paginate($perPage);

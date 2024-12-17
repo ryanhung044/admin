@@ -77,7 +77,8 @@ class StudentController extends Controller
                     });
                 })
                 // ->orderBy('id', 'desc')
-                ->select('users.id', 'users.user_code', 'users.full_name', 'users.email', 'users.phone_number', 'users.address', 'users.sex', 'users.place_of_grant', 'users.nation', 'users.avatar', 'users.role', 'users.is_active', 'users.major_code', 'users.course_code', 'users.semester_code')
+
+                ->select('users.id', 'users.user_code', 'users.full_name', 'users.email', 'users.phone_number', 'users.address', 'users.sex', 'users.place_of_grant', 'users.nation', 'users.avatar', 'users.role', 'users.is_active', 'users.major_code', 'users.narrow_major_code', 'users.course_code', 'users.semester_code')
                 ->when($orderBy == 'course', function ($query) use ($orderDirection) {
                 // Sắp xếp theo cate_name của course
                 $query->join('categories', 'users.course_code', '=', 'categories.cate_code')

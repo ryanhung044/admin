@@ -318,31 +318,39 @@ class ServiceController extends Controller
         }
 
 
-        $content = "";
+        $contentParts = [];
 
         if (!empty($validatedData['full_name'])) {
-            $content .= "Họ và tên mới: {$validatedData['full_name']} \n";
+            $contentParts[] = "Họ và tên cũ: {$validatedData['full_name_old']} __ Họ và tên mới: {$validatedData['full_name']}";
         }
 
         if (!empty($validatedData['sex'])) {
-            $content .= "Giới tính mới: {$validatedData['sex']} \n";
+            $contentParts[] = "Giới tính cũ: {$validatedData['sex_old']} __ Giới tính mới: {$validatedData['sex']}";
         }
 
         if (!empty($validatedData['date_of_birth'])) {
-            $content .= "Ngày sinh mới: {$validatedData['date_of_birth']} \n";
+            $contentParts[] = "Ngày sinh cũ: {$validatedData['date_of_birth_old']} __ Ngày sinh mới: {$validatedData['date_of_birth']}";
         }
 
         if (!empty($validatedData['address'])) {
-            $content .= "Địa chỉ mới: {$validatedData['address']} \n";
+            $contentParts[] = "Địa chỉ cũ: {$validatedData['address_old']}  __ Địa chỉ mới: {$validatedData['address']}";
         }
 
         if (!empty($validatedData['citizen_card_number'])) {
-            $content .= "Số CMND/CCCD mới: {$validatedData['citizen_card_number']} \n";
+            $contentParts[] = "Số CMND/CCCD cũ: {$validatedData['citizen_card_number_old']}  __ Số CMND/CCCD mới: {$validatedData['citizen_card_number']}";
         }
 
         if (!empty($validatedData['note'])) {
-            $content .= "Ghi chú: {$validatedData['note']} \n";
+            $contentParts[] = "Ghi chú: {$validatedData['note']}";
         }
+
+        // Nếu không có gì thay đổi, trả về lỗi
+        if (empty($contentParts)) {
+            return response()->json(['message' => 'Không có thông tin nào được thay đổi.'], 400);
+        }
+
+        // Kết hợp nội dung
+        $content = implode("\n", $contentParts);
 
         // Tạo dữ liệu dịch vụ mới
         $data = [

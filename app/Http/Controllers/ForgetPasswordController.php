@@ -51,7 +51,7 @@ class ForgetPasswordController extends Controller
             );
 
             // Create reset password URL
-            $resetUrl = url("http://localhost:5173/reset-password/$token/$email");
+            $resetUrl = url("https://feduvn.com/reset-password/$token/$email");
 
             // Send email via Job
             SendResetPasswordEmail::dispatch($email, $resetUrl);

@@ -139,7 +139,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('import-students', 'importStudents');
             Route::get('export-students', 'exportStudents');
         });
-        
+
         Route::get('/subjects', [SubjectController::class, 'index']);
         Route::get('/subjects/{subject_code}', [SubjectController::class, 'show']);
         Route::post('/subjects', [SubjectController::class, 'store']);
@@ -359,9 +359,6 @@ Route::get('status-attendances', [DashboardController::class, 'getStatusAttendan
 // Admin
 // Student
 Route::post('services/change-major/{user_code}',            [ServiceController::class, 'changeMajor']);
-
-// cung cấp thẻ sinh viên
-Route::post('services/register/dang-ky-cap-lai-the',        [ServiceController::class, 'provideStudentCard']);
 
 Route::apiResource('fees', FeeController::class);
 //momo học phí
