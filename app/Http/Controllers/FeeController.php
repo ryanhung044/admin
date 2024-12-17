@@ -101,7 +101,7 @@ class FeeController extends Controller
     public function update(Request $request, Fee $fee)
     {
         // return $request;
-        DB::beginTransaction();
+        // DB::beginTransaction();
         $fee->status = $request['status'];
         try {
             $isFullyPaid = $request['status'] == 'paid';
@@ -142,9 +142,9 @@ class FeeController extends Controller
                 'data' => $fee,
             ], 200);
             // Logic xử lý
-            DB::commit();
+            // DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
+            // DB::rollBack();
             return response()->json(['error' => 'Something went wrong!'], 500);
         }
     }
