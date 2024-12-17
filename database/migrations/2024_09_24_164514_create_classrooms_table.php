@@ -29,7 +29,7 @@ return new class extends Migration
                     ->cascadeOnDelete()
                         ->cascadeOnUpdate();
 
-            $table->string('subject_code',40)
+            $table->string('subject_code',40)->nullable()
                   ->comment('Mã môn học');
 
             $table->foreign('subject_code')
