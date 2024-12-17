@@ -101,7 +101,7 @@ class FeeController extends Controller
         // return $request;
         // DB::beginTransaction();
         $fee->status = $request['status'];
-        try {
+        // try {
             $isFullyPaid = $request['status'] == 'paid';
 
             if ($isFullyPaid) {
@@ -141,10 +141,10 @@ class FeeController extends Controller
             ], 200);
             // Logic xử lý
             // DB::commit();
-        } catch (\Exception $e) {
-            // DB::rollBack();
-            return response()->json(['error' => 'Something went wrong!'], 500);
-        }
+        // } catch (\Exception $e) {
+        //     // DB::rollBack();
+        //     return response()->json(['error' => 'Something went wrong!'], 500);
+        // }
     }
 
 
