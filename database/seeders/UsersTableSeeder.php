@@ -53,7 +53,7 @@ class UsersTableSeeder extends Seeder
         $middleNames = ['Văn', 'Thị', 'Hữu', 'Minh', 'Quang', 'Ngọc', 'Gia', 'Anh', 'Thanh', 'Tuấn'];
         $firstNames = ['Hưng', 'Hạnh', 'Dũng', 'Trang', 'Hải', 'Linh', 'Tuấn', 'Lan', 'Thảo', 'Nam'];
 
-        for ($i = 102; $i <= 100; $i++) {
+        for ($i = 102; $i <= 200; $i++) {
             // Tạo tên thật ngẫu nhiên
             $fullName = $lastNames[array_rand($lastNames)] . ' '
                 . $middleNames[array_rand($middleNames)] . ' '
