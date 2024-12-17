@@ -20,7 +20,7 @@ class UsersTableSeeder extends Seeder
         $middleNames = ['Văn', 'Thị', 'Hữu', 'Minh', 'Quang', 'Ngọc', 'Gia', 'Anh', 'Thanh', 'Tuấn'];
         $firstNames = ['Hưng', 'Hạnh', 'Dũng', 'Trang', 'Hải', 'Linh', 'Tuấn', 'Lan', 'Thảo', 'Nam'];
 
-        for ($i = 201 ; $i < 300 ; $i++) {
+        for ($i = 301 ; $i < 400 ; $i++) {
             $fullName = $lastNames[array_rand($lastNames)] . ' '
                 . $middleNames[array_rand($middleNames)] . ' '
                 . $firstNames[array_rand($firstNames)];
@@ -43,7 +43,7 @@ class UsersTableSeeder extends Seeder
                 'major_code' => 'WEB',
                 'narrow_major_code' => ['FE', 'BE'][rand(0, 1)],
                 'semester_code' => 'S1',
-                'course_code' => 'K1',
+                'course_code' => 'K2',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
