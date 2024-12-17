@@ -22,7 +22,7 @@ class ShowListScheduleCanBeTransfer extends FormRequest
     public function rules(): array
     {
         return [
-            'course_code' => 'required|exists:categories,cate_code',
+            // 'course_code' => 'required|exists:categories,cate_code',
             'class_code' => 'required|exists:classrooms,class_code',
             'session_code' => 'required|exists:categories,cate_code'
         ];

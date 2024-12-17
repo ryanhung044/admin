@@ -29,14 +29,7 @@
             font-size: 16px;
             color: #555;
         }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
-        }
+
         .footer {
             font-size: 12px;
             color: #aaa;
@@ -50,7 +43,7 @@
         <p>Hello,</p>
         <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu của bạn. Nhấp vào nút bên dưới để đặt lại mật khẩu của bạn.</p>
         {{-- <p><a href="{{route("reset.password",$token)}}" class="btn">Đặt lại mật khẩu</a></p> --}}
-        <p><a href="{{ $url }}" class="btn">Đặt lại mật khẩu</a></p>
+        <a href="{{ $url }}" class="btn">Đặt lại mật khẩu</a>
         <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
         <p>Cảm ơn,</p>
         <p>The {{ config('app.name') }} Team</p>

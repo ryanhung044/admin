@@ -47,6 +47,9 @@ class TeacherController extends Controller
         try {
             $perPage = $request->input('per_page', 10);
             $search = $request->input('search');
+            $orderBy = $request->input('orderBy', 'created_at'); 
+            $orderBy === $orderBy; 
+            $orderDirection = $request->input('orderDirection', 'asc'); 
             $teachers = User::where([
                 'role' => '2'
             ])->when($search, function ($query, $search) {
@@ -63,7 +66,9 @@ class TeacherController extends Controller
                 'sex',
                 'is_active',
                 'deleted_at',
-            )->withTrashed()->orderBy('user_code','desc')->paginate($perPage);
+            )->withTrashed()
+            ->orderBy($orderBy, $orderDirection)
+            ->paginate($perPage);
 
             return response()->json($teachers, 200);
         } catch (\Throwable $th) {

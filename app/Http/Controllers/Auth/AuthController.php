@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Login;
@@ -30,7 +31,6 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         // try {
-
             $data = $request->validated();
             $user = User::firstWhere('email',$data['email']);
 
@@ -88,32 +88,34 @@ class AuthController extends Controller
                 'status' => false,
                 'message' => "Token không hợp lệ hoặc đã hết hạn!"
             ], 401);
-
-
-    } catch (\Throwable $th) {
-        return $this->handleErrorNotDefine($th);
-    }
+        } catch (\Throwable $th) {
+            return $this->handleErrorNotDefine($th);
+        }
 
     }
 
-    public function changePassword(Request $request)
+    public function changePassword(ChangePasswordRequest $request)
     {
-        // Validate input
-        try{
-            $request->validate([
-                'current_password' => 'required',
-                'new_password' => 'required|min:8|confirmed',
-            ]);
+        try {
 
             $user_code = $request->user()->user_code;
 
             $user = User::where('user_code', $user_code)->firstOrFail();
-            $user->update(['password' => bcrypt($request->new_password)]);
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'message' => 'Mật khẩu hiện tại không khớp',
+                    'password_current' => $request->current_password,
+                    'password_real' => $user->password
+                ], 500);
+            }
 
+            $user->update(['password'=> $request->new_password]);
 
-            return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công.']);
-        }catch(\Throwable $th){
-            return response()->json(['error' => $th->getMessage()]);
+            return response()->json(['message' => 'Mật khẩu đã được thay đổi thành công.','data'=>$user]);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => $th->getMessage()], 500);
         }
     }
+
+
 }

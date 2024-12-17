@@ -32,20 +32,28 @@ class HandleStep2 extends FormRequest
             'list_study_dates' => 'required|array',
             'list_study_dates.*' => 'date|after_or_equal:tomorrow',
             'room_code' => 'required|exists:categories,cate_code',
-            'teacher_code' => 'nullable|exists:users,user_code',
+            'teacher_code' => 'required|exists:users,user_code',
         ];
     }
 
     public function messages(){
         return [
-            // 'list_study_dates.required' => 'Danh sách lịch học không được để trống!',
-            // 'list_study_dates.array' => 'Danh sách lịch học phải là 1 mảng!',
-            // 'list_study_dates.*.date' => 'Lịch học không đúng định dạng (Y-m-d)!',
-            // 'list_study_dates.*.after_or_equal' => 'Các ngày học phải là tương lai!',
-            // 'session_code.required' => 'Bạn chưa chọn ca học!',
-            // 'session_code.exists' => "Ca học này không tồn tại!",
-            // 'subject_code.required' => "Bạn chưa chọn môn học!",
-            // 'subject_code.exists' => "Môn học này không tồn tại!"
+            'course_code.required' => 'Bạn chưa chọn khoá học',
+            'course_code.exists' => 'Khoá học này không tồn tại trong hệ thống',
+            'subject_code.required' => "Bạn chưa chọn môn học!",
+            'subject_code.exists' => "Môn học này không tồn tại!",
+            'major_code.required' => 'Bạn chưa chọn chuyên ngành!',
+            'major_code.exists' => 'Chuyên ngành này không tồn tại!',
+            'session_code.required' => 'Bạn chưa chọn ca học!',
+            'session_code.exists' => "Ca học này không tồn tại!",
+            'list_study_dates.required' => 'Danh sách lịch học không được để trống!',
+            'list_study_dates.array' => 'Danh sách lịch học phải là 1 mảng!',
+            'list_study_dates.*.date' => 'Lịch học không đúng định dạng (Y-m-d)!',
+            'list_study_dates.*.after_or_equal' => 'Các ngày học phải là tương lai!',
+            'room_code.required' => 'Bạn chưa chọn phòng học!',
+            'room_code.exists' => 'Phòng học này không tồn tại trong hệ thống!',
+            'teacher_code.required' => 'Bạn chưa chọn giảng viên cho lớp học!',
+            'teacher_code.exists' => 'Giảng viên này không tồn tại trong hệ thống!'
         ];
     }
 

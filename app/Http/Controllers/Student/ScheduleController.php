@@ -264,7 +264,8 @@ class ScheduleController extends Controller
                 )
                 ->first();
 
-            $classroom_others_studying = Classroom::with([
+                // Lấy ra các lớp học khác ở hiện tại
+            $classroom_others_current = Classroom::with([
                 'schedules' => function ($query) {
                     $query->select('class_code', 'session_code', 'date');
                 }
@@ -272,7 +273,14 @@ class ScheduleController extends Controller
                 ->whereHas('users', function ($query) use ($student) {
                     $query->where('classroom_user.user_code', $student->user_code);
                 })
-                ->where('class_code', 'LIKE', $data['course_code'] . "." . '%')
+                ->whereHas('schedules', function($query){
+                        $query->where('date', function($subQuery){
+                            $subQuery->select(DB::raw('MIN(date)'))
+                            ->from('schedules')
+                            ->whereColumn('schedules.class_code', 'classrooms.class_code');
+                        })->where('date', '>', now()->format('Y-m-d'));
+                })
+                // ->where('class_code', 'LIKE', $data['course_code'] . "." . '%')
                 ->where('class_code', '!=', $classroom_current->class_code)
                 ->get()->pluck('schedules')->flatten()->unique('class_code')->values();
 
@@ -316,9 +324,9 @@ class ScheduleController extends Controller
                 ->whereHas('schedules.room', function ($query) {
                     $query->whereRaw('CAST(value as SIGNED) > (SELECT COUNT(*) FROM classroom_user where classroom_user.class_code = schedules.class_code)');
                 })
-                ->where('class_code', 'LIKE', $data['course_code'] . "." . '%')
+                ->where('class_code', 'LIKE', $this->sliceCourseFromClasscode($classroom_current->class_code) . "." . '%')
                 ->where('class_code', '!=', $classroom_current->class_code)
-                ->get()->map(function ($classroom_current) use ($classroom_others_studying) {
+                ->get()->map(function ($classroom_current) use ($classroom_others_current) {
 
 
                     $subject_info = optional($classroom_current->subject);
@@ -328,7 +336,7 @@ class ScheduleController extends Controller
                     $study_days = $this->responseTypeDay($first_schedule->date);
 
 
-                    foreach ($classroom_others_studying as $cls_others_studying) {
+                    foreach ($classroom_others_current as $cls_others_studying) {
 
                         if ($session_info->cate_code == $cls_others_studying['session_code'] && $this->responseTypeDay($cls_others_studying['date']) == $study_days) {
                             return null;
@@ -418,19 +426,12 @@ class ScheduleController extends Controller
             $student = request()->user();
             $student_code = $student->user_code;
 
-
-            if ($student->course_code != $data['course_code']) {
-                return $this->response422('Khoá học không hợp lệ!');
-            }
-
             // Trường hợp mã lớp học hiện tại = lớp học muốn chuyển đến 
             if ($data['class_code_current'] == $data['class_code_target']) {
                 return $this->response422('Bạn đang học tại lớp học này rồi!');
             }
 
             // Kiểm tra xem học sinh này hiện tại có học trong lớp học có mã lớp được gửi lên hay không?
-            
-
             $classroom_current = Classroom::withCount('users')
             ->with('schedules' ,function($query){
                 $query->select('class_code', 'date')->orderBy('date', 'asc')->limit(1);

@@ -21,15 +21,27 @@ class ForgetPasswordController extends Controller
         return view('auth.forgot-password');
     }
 
-    function forgetPasswordPost(Request $request){
-        try{
-            $request->validate([
+    function forgetPasswordPost(Request $request)
+    {
+        try {
+            // Validate email
+            $validator = Validator::make($request->all(), [
                 'email' => 'required|email|exists:users,email',
+            ], [
+                'email.exists' => 'Email không tồn tại trong hệ thống.',
+                'email.email'  => 'Email không hợp lệ'
             ]);
 
-            $email = $request->input('email');
-            $token = Str::random(64);
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => $validator->errors()->first('email') // Lấy thông báo lỗi đầu tiên cho email
+                ], 422); // Sử dụng mã lỗi 422 thay vì 404
+            }
 
+            $email = $request->input('email');
+
+            // Generate token
+            $token = Str::random(64);
             DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $email],
                 [
@@ -37,17 +49,19 @@ class ForgetPasswordController extends Controller
                     'created_at' => Carbon::now(),
                 ]
             );
+
+            // Create reset password URL
             $resetUrl = url("http://localhost:5173/reset-password/$token/$email");
 
-            // Gửi email qua Job
+            // Send email via Job
             SendResetPasswordEmail::dispatch($email, $resetUrl);
 
-            return response()->json(['message' => 'Vui lòng kiểm tra Email']);
-
-        }catch(\Throwable $th){
-            return response()->json(['message' => $th->getMessage()]);
+            return response()->json(['message' => 'Vui lòng kiểm tra Email.']);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'Đã xảy ra lỗi, vui lòng thử lại sau.'], 500);
         }
     }
+
 
     function resetPassword(Request $request){
         $token = $request->query('token');
@@ -64,8 +78,7 @@ class ForgetPasswordController extends Controller
             'password' => 'required|confirmed|min:6',
         ]);
 
-        $password_reset = DB::table('password_reset_tokens')
-                ->where([
+        $password_reset = DB::table('password_reset_tokens')->where([
                     'email' => $request->email,
                     'token' => $request->token
                  ])->first();
@@ -74,8 +87,16 @@ class ForgetPasswordController extends Controller
             return response()->json(['message' => 'token không tồn tại hoặc hết hạn']);
         }
 
-        User::where('email',$request->email)->update(['password' => bcrypt($request->password)]);
-        return response()->json(['message' => 'Đổi mật khẩu thành công'], 200);
+        $userUpdate = User::where('email', $request->email)
+        ->update(['password' => bcrypt($request->password)]);
+
+         DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->delete();
+
+
+        return response()->json(['message' => 'Đổi mật khẩu thành công','data'=> $userUpdate], 200);
        }
        catch(\Throwable $th){
         return response()->json(['error' => $th->getMessage()]);

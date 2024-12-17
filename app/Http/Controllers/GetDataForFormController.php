@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use PhpParser\Node\Stmt\TryCatch;
 
 class GetDataForFormController extends Controller
 {
@@ -118,6 +119,8 @@ class GetDataForFormController extends Controller
         }
     }
 
+
+
     public function listSubjectsForForm(){
         try {
             $subjects = Subject::where([
@@ -138,6 +141,21 @@ class GetDataForFormController extends Controller
             return response()->json($subjects);
         } catch (\Throwable $th) {
             return $this->handleErrorNotDefine($th);   
+        }
+    }
+
+    public function listSubjectsToSemesterAndMajorForForm(string $semester_code,$major_code){
+        try {
+            $subjects = Subject::where([
+                'is_active' => true,
+                'major_code' => $major_code,
+                'semester_code' => $semester_code
+            ])
+            ->select('subject_code', 'subject_name', 'tuition', 're_study_fee', 'credit_number', 'total_sessions', 'semester_code', 'major_code')->get();
+        return response()->json($subjects);
+            
+        } catch (\Throwable $th) {
+            return $this->handleErrorNotDefine($th);
         }
     }
 }

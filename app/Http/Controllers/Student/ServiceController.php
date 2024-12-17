@@ -88,7 +88,7 @@ class ServiceController extends Controller
       if ($request->has('status') && $request['status']) {
         $data->where('status', $request['status']);
       }
-
+      $data->orderBy('created_at', 'desc');
       // Paginate the results and return the paginated response
       $services = $data->paginate(25);
 
@@ -102,11 +102,12 @@ class ServiceController extends Controller
   {
     $user_code = request()->user()->user_code;
     $subject = Score::Where('is_pass', false)
-                    ->where('status', false)
-                    ->where('student_code', $user_code)
-                    ->with('Subject')->get();
+      ->where('status', false)
+      ->where('student_code', $user_code)
+      ->with('Subject')->get();
     return response()->json(['data' => $subject], 200);
   }
+
 
   public function LearnAgain(Request $request)
   {
@@ -126,19 +127,19 @@ class ServiceController extends Controller
 
       $service = Service::create($data);
       if ($service) {
+        $redirectUrl = url("/send-email/learn-again/{$service->id}");
 
-      $redirectUrl = url("/send-email/learn-again/{$service->id}");
 
-      // Gọi API gửi email
-      $response = Http::post($redirectUrl, [
+        // Gọi API gửi email
+        $response = Http::post($redirectUrl, [
           'subject_code' => $subject_code,  // Gửi danh sách user_code
-      ]);
+        ]);
 
-      if ($response->successful()) {
+        if ($response->successful()) {
           return response()->json(['message' => 'Gửi dịch vụ thành công và email đã được gửi', 'service' => $service]);
-      } else {
+        } else {
           return response()->json(['message' => 'Gửi dịch vụ thành công nhưng không thể gửi email', 'service' => $service]);
-      }
+        }
       }
       return response()->json(['message' => 'gửi dịch vụ thành công', 'service' => $service]);
     } catch (\Throwable $th) {
@@ -175,7 +176,7 @@ class ServiceController extends Controller
 
       if (!in_array($status, ['approved', 'rejected'])) {
         return response()->json(['message' => 'Trạng thái không hợp lệ']);
-        }
+      }
 
       $service = Service::findOrFail($id);  // Lấy dịch vụ
 
@@ -298,6 +299,7 @@ class ServiceController extends Controller
         'address'       => 'nullable|string|max:255',
         'citizen_card_number'  => 'nullable|string|max:20',
         'note'                  => 'nullable|string|max:500',
+
       ]);
 
       $user_code = $request->user()->user_code;
@@ -325,7 +327,7 @@ class ServiceController extends Controller
       }
 
       if (!empty($validatedData['id_number'])) {
-        $content .= "Số CMND/CCCD mới: {$validatedData['id_number']} \n";
+        $content .= "Số CMND/CCCD mới: {$validatedData['citizen_card_number']} \n";
       }
 
       if (!empty($validatedData['note'])) {
@@ -398,14 +400,27 @@ class ServiceController extends Controller
     }
   }
 
-  public function StudentsInfoOld(){
-        try{
-            $user_code = request()->user()->user_code;
-            $student = User::where('user_code', $user_code);
-            return response()->json([]);
+  public function StudentsInfoOld()
+  {
+    try {
+      $user_code = request()->user()->user_code;
+      $studentOld = User::where('user_code', $user_code)->firstOrFail();
+      // $studentOld = User::all();
 
-        }catch(\Throwable $th){
-            return response()->json(['message' => $th->getMessage()]);
-        }
+      if (!$studentOld) {
+        return response()->json(['message' => 'không tìm thấy thông tin cũ']);
+      }
+
+      $data = [
+        'full_name'       => $studentOld->full_name,
+        'sex'             => $studentOld->sex,
+        'date_of_birth'   => $studentOld->birthday,
+        'address'         => $studentOld->address,
+        'citizen_card_number' => $studentOld->citizen_card_number,
+      ];
+      return response()->json(['data' =>  $data]);
+    } catch (\Throwable $th) {
+      return response()->json(['message' => $th->getMessage()]);
+    }
   }
 }

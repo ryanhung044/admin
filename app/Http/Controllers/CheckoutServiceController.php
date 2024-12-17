@@ -277,7 +277,7 @@ class CheckoutServiceController extends Controller
 
     public function vnpay_payment_return(Request $request){
         $data = $request->all();
-        dd($data);
+        // dd($data);
         $vnp_TransactionNo = $request->input('vnp_TransactionNo');
         $vnp_Amount        = $request->input('vnp_Amount');
 
@@ -308,7 +308,7 @@ class CheckoutServiceController extends Controller
                 'receipt_number'=> $vnp_TransactionNo,
             ];
 
-            dd($dataTransaction);
+            // dd($dataTransaction);
             Transaction::create($dataTransaction);
             return redirect()->route('payment.success')->with('success', 'Thanh toán thành công!');
         } else {
@@ -318,7 +318,7 @@ class CheckoutServiceController extends Controller
     }
 
     public function vnpay_payment_success(){
-        dd('thành công');
+        return view('payment-suscess');
     }
 
     public function vnpay_payment_fail(Request $request){

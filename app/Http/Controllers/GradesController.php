@@ -178,7 +178,7 @@ class GradesController extends Controller
 
     public function show(string $classCode)
     {
-        try {
+        // try {
             $classrooms = Classroom::where('class_code', $classCode)
                 ->with([
                     'subject' => function ($query) {
@@ -258,12 +258,12 @@ class GradesController extends Controller
                 );
             }
             return response()->json($result, 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Có lỗi xảy ra' . $th->getMessage(),
-                'error' => true,
-            ]);
-        }
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'message' => 'Có lỗi xảy ra' . $th->getMessage(),
+        //         'error' => true,
+        //     ]);
+        // }
     }
 
     // public function getByParam(Request $request){

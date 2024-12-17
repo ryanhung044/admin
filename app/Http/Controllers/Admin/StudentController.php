@@ -53,6 +53,8 @@ class StudentController extends Controller
         try {
             $perPage = $request->input('per_page', 10);
             $search = $request->input('search');
+            $orderBy = $request->input('orderBy', 'created_at'); 
+            $orderDirection = $request->input('orderDirection', 'asc'); 
             $list_users = User::with([
                 'major' => function ($query) {
                     $query->select('cate_code', 'cate_name', 'parent_code');
@@ -71,8 +73,16 @@ class StudentController extends Controller
                             ->orWhere('email', 'LIKE', "%$search%");
                     });
                 })
-                ->orderBy('id', 'desc')
-                ->select('id', 'user_code', 'full_name', 'email', 'phone_number', 'address', 'sex', 'place_of_grant', 'nation', 'avatar', 'role', 'is_active', 'major_code', 'course_code', 'semester_code')
+                // ->orderBy('id', 'desc')
+                ->select('users.id', 'users.user_code', 'users.full_name', 'users.email', 'users.phone_number', 'users.address', 'users.sex', 'users.place_of_grant', 'users.nation', 'users.avatar', 'users.role', 'users.is_active', 'users.major_code', 'users.course_code', 'users.semester_code')
+                ->when($orderBy == 'course', function ($query) use ($orderDirection) {
+                // Sắp xếp theo cate_name của course
+                $query->join('categories', 'users.course_code', '=', 'categories.cate_code')
+                      ->orderBy('categories.cate_name', $orderDirection);
+                }, function ($query) use ($orderBy, $orderDirection) {
+                    // Sắp xếp theo orderBy bình thường
+                    $query->orderBy($orderBy, $orderDirection);
+                })
                 ->paginate($perPage);
 
             if ($list_users->isEmpty()) {
