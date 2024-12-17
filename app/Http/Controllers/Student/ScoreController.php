@@ -108,7 +108,8 @@ class ScoreController extends Controller
     {
         try {
             $userCode = $request->user()->user_code;
-            $listSubject = User::where('user_code', $userCode)
+            
+            return $listSubject = User::where('user_code', $userCode)
                         ->with([
                             'subjectMajor' => function ($query) {
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
@@ -135,7 +136,7 @@ class ScoreController extends Controller
                         ->get(['user_code', 'major_code', 'narrow_major_code', 'semester_code']);
 
             $result = $listSubject->map(function ($user) {
-                return $user;
+                 $user;
                 $userSemesterCode = $user->semester_code; 
                 $subjectsMajor = $user->subjectMajor;
                 $subjectsNarrowMajor = $user->subjectNarrowMajor;
