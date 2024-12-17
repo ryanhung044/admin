@@ -15,7 +15,7 @@ class Score extends Model
         'is_pass',
         'status',
     ];
-    public function Subject() {
+    public function subject() {
         return $this->belongsTo(Subject::class, 'subject_code', 'subject_code');
     }
 }
