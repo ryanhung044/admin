@@ -138,7 +138,7 @@ class ScoreController extends Controller
                 $userSemesterCode = $user->semester_code; 
                 $subjectsMajor = $user->subjectMajor;
                 $subjectsNarrowMajor = $user->subjectNarrowMajor;
-                $scores = $user->scores;
+                return $scores = $user->scores;
                 $major = $user->major->cate_name;
                 $narrowMajor = $user->narrow_major->cate_name ?? null;
 
