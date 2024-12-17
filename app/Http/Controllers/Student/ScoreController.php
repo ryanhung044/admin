@@ -109,6 +109,32 @@ class ScoreController extends Controller
         try {
             $userCode = $request->user()->user_code;
             return $listSubject = User::where('user_code', $userCode)
+            ->with([
+                'subjectMajor' => function ($query) {
+                    $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
+                          ->with('semester:cate_code,cate_name');
+                },
+                'subjectNarrowMajor' => function ($query) {
+                    $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
+                          ->with('semester:cate_code,cate_name');
+                },
+                'scores' => function ($query) {
+                    $query->select('subject_code', 'score', 'is_pass')
+                          ->with('subject:subject_code,subject_name,credit_number,semester_code,major_code')
+                          ->with(['subject.semester' => function ($query) {
+                              $query->select('cate_code', 'cate_name');
+                          }]);
+                },
+                'major' => function ($query) {
+                    $query->select('cate_code', 'cate_name');
+                },
+                'narrow_major' => function ($query) {
+                    $query->select('cate_code', 'cate_name');
+                }
+            ])
+            ->get(['user_code', 'major_code', 'narrow_major_code', 'semester_code']);
+         
+            $listSubject = User::where('user_code', $userCode)
                         ->with([
                             'subjectMajor' => function ($query) {
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')

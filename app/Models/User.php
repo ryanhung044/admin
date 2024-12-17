@@ -67,7 +67,8 @@ class User extends Authenticatable
         'password' => 'hashed'
     ];
 
-    public function setPasswordAttribute($value) {
+    public function setPasswordAttribute($value)
+    {
         $this->attributes['password'] = Hash::make($value);
     }
 
@@ -78,19 +79,23 @@ class User extends Authenticatable
     }
 
 
-    public function major(){
+    public function major()
+    {
         return $this->belongsTo(Category::class, 'major_code', 'cate_code');
     }
 
-    public function narrow_major(){
+    public function narrow_major()
+    {
         return $this->belongsTo(Category::class, 'narrow_major_code', 'cate_code');
     }
-    public function course(){
+    public function course()
+    {
         return $this->belongsTo(Category::class, 'course_code', 'cate_code');
     }
 
 
-    public function semester(){
+    public function semester()
+    {
         return $this->belongsTo(Category::class, 'semester_code', 'cate_code');
     }
 
@@ -118,18 +123,18 @@ class User extends Authenticatable
 
     public function classrooms()
     {
-        return $this->belongsToMany(Classroom::class, 'classroom_user', 'user_code', 'class_code', 'user_code' ,'class_code')
-        ->withPivot('user_code');
+        return $this->belongsToMany(Classroom::class, 'classroom_user', 'user_code', 'class_code', 'user_code', 'class_code')
+            ->withPivot('user_code');
     }
 
     public function schedules()
     {
-        return $this->belongsToMany(Schedule::class, 'schedule_student', 'student_code', 'schedule_id','user_code','id')
-        ->withPivot('student_code');
-
+        return $this->belongsToMany(Schedule::class, 'schedule_student', 'student_code', 'schedule_id', 'user_code', 'id')
+            ->withPivot('student_code');
     }
 
-    public function fees(){
+    public function fees()
+    {
         return $this->hasMany(Fee::class);
     }
 
@@ -137,13 +142,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Score::class, 'student_code', 'user_code');
     }
-    
+
     public function subjectMajor()
     {
-        return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code', 'major_code', 'major_code');
+        return $this->belongsToMany(Subject::class, 'categories', 'major_code', 'subject_code');
     }
+
     public function subjectNarrowMajor()
     {
-        return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code', 'narrow_major_code', 'major_code');
+        return $this->belongsToMany(Subject::class, 'categories', 'narrow_major_code', 'subject_code');
     }
+
+
+    // public function subjectMajor()
+    // {
+    //     return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code', 'major_code', 'major_code');
+    // }
+    // public function subjectNarrowMajor()
+    // {
+    //     return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code', 'narrow_major_code', 'major_code');
+    // }
 }
