@@ -23,8 +23,7 @@ class StoreSemesterRequest extends FormRequest
     {
         return [
             'cate_name'=>'required|string',
-            'cate_code'=>'required',
-            'type'=> 'required'
+            'value'    =>'required'
         ];
     }
 }

@@ -120,7 +120,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Khu vực admin
     Route::middleware('role:0')->prefix('/admin')->as('admin.')->group(function () {
 
-
         Route::apiResource('sessions', SessionController::class);
         Route::delete('sessions/{code}', [SessionController::class, 'destroy']);
         Route::post('sessions/{code}', [SessionController::class, 'update']);
@@ -129,7 +128,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('course', CourseController::class);
         Route::put('course/{code}', [CourseController::class, 'update']);
         Route::delete('course/{code}', [CourseController::class, 'destroy']);
-
 
         Route::apiResource('teachers', TeacherController::class);
         Route::post('teachers/updateActive/{userCode}', [TeacherController::class, 'updateActive']);
@@ -181,7 +179,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('getListCategory/{type}', [CategoryController::class, 'getListCategory']);
         Route::post('uploadImage', [CategoryController::class, 'uploadImage']);
 
-        Route::apiResource('semesters', SemesterController::class);
+        Route::apiResource('semester', SemesterController::class);
 
 
         Route::get('classrooms/{class_code}/grades', [GradesController::class, 'show']);

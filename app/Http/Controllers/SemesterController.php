@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSemesterRequest;
 use App\Http\Requests\UpdateSemesterRequest;
 use App\Models\Category;
+use App\Models\Fee;
 use App\Models\Semester;
+use App\Models\Subject;
 use App\Models\User;
 use App\Repositories\Contracts\SemesterRepositoryInterface;
 use Illuminate\Http\Request;
@@ -35,8 +37,15 @@ class SemesterController extends Controller
     public function store(StoreSemesterRequest $request)
     {
         try {
-            $model = $this->semesterRepository->create($request->toArray());
-            return response()->json(['message' => 'Thêm thành công'], 200);
+            $data = [
+                'cate_code' => 'S'.$request->value,
+                'cate_name' => $request->cate_name,
+                'value'     => $request->value,
+                'type'      => 'semester'
+            ];
+
+            $semester =  Category::create($data);
+            return response()->json(['message' => 'Thêm thành công','data'=>$semester], 200);
         } catch (\Throwable $th) {
             return response()->json(['message' => $th->getMessage()]);
         }
@@ -45,25 +54,36 @@ class SemesterController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSemesterRequest $request, int $id)
-    {
-        try {
-            $model = $this->semesterRepository->update($request->toArray(), $id);
-            return response()->json(['message' => 'cập nhật thành công'], 200);
-        } catch (NotFoundHttpException $e) {
-            return response()->json(['message' => $e->getMessage()]);
-        } catch (\Throwable $th) {
-            return response()->json(['message' => $th->getMessage()]);
-        }
-    }
+    // public function update(UpdateSemesterRequest $request, int $id)
+    // {
+    //     try {
+
+    //         return response()->json(['message' => 'cập nhật thành công'], 200);
+    //     } catch (NotFoundHttpException $e) {
+    //         return response()->json(['message' => $e->getMessage()]);
+    //     } catch (\Throwable $th) {
+    //         return response()->json(['message' => $th->getMessage()]);
+    //     }
+    // }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(string $cate_code)
     {
         try {
-            $model = $this->semesterRepository->delete($id);
+            $userExists = User::where('semester_code',$cate_code)->exists();
+            $subjectExists = Subject::where('semester_code', $cate_code)->exists();
+            $feeExits = Fee::where('semester_code',$cate_code)->exists();
+
+            if($userExists || $subjectExists || $feeExits){
+                return response()->json(['message'=> 'không thể xóa kỳ học'],409);
+            }
+
+            $semester = Category::where('cate_code', $cate_code)
+                                ->where('type','semester')->firstOrFail();
+
+            $semester->delete();
             return response()->json(['message' => 'xóa thành công']);
         } catch (NotFoundHttpException $e) {
             return response()->json(['message' => $e->getMessage()]);

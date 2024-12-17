@@ -4,17 +4,21 @@ namespace App\Repositories;
 use App\Models\Category;
 use App\Models\TimeSlot;
 use App\Repositories\Contracts\SemesterRepositoryInterface;
+use GuzzleHttp\Psr7\Request;
 
 class SemesterRepository implements SemesterRepositoryInterface{
     public function getAll(){
        return Category::query()->where('type','like','%semester%')->get();
     }
 
-    public function create(array $data){
-        return Category::create($data);
+    public function create(Request $request){
+        // $data = [
+        //     $request->
+        // ]
+        return Category::create();
     }
 
-    public function update(array $data , int $id){
+    public function update(Request $data , int $id){
         return Category::findOrFail($id)->update($data);
     }
 

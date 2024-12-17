@@ -156,6 +156,7 @@ class ClassroomController extends Controller
                     'room_name' => $room_info->cate_name ?? null,
                     'session_name' => $session_info->cate_name ?? null,
                     'session_value' => $session_info->value ?? null,
+                    'is_active' => $classroom->is_active
                 ];
             });
     
