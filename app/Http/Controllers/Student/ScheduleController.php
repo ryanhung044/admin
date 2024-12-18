@@ -61,7 +61,7 @@ class ScheduleController extends Controller
 
             $student_code = request()->user()->user_code;
 
-            $today = now();
+            // $today = now();
 
             // $dates_want_response = [];
 
@@ -86,7 +86,7 @@ class ScheduleController extends Controller
                 'classroom'
             ])->whereIn('class_code', $classroom_codes)
                 // ->whereIn('date', $dates_want_response)
-                ->where('date', '>=', $today)
+                // ->where('date', '>=', $today)
                 ->orderBy('date', 'asc')
                 ->orderBy('session_code', 'asc') 
                 ->get()->map(function ($schedule) {

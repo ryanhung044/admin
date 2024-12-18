@@ -104,7 +104,7 @@ class NewsletterController extends Controller
      */
     public function store(StoreNewsletterRequest $request)
     {
-        // try {
+        try {
             $params = $request->except('_token');
 
             // Xử lý ảnh nếu có
@@ -132,10 +132,10 @@ class NewsletterController extends Controller
             Newsletter::create($params);
     
             return response()->json($params, 200);
-        // } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
 
-        //     return $this->handleErrorNotDefine($th);
-        // }
+            return $this->handleErrorNotDefine($th);
+        }
     }
 
 
