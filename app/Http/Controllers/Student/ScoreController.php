@@ -116,6 +116,7 @@ class ScoreController extends Controller
                             },
                             'subjectNarrowMajor' => function ($query) {
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
+                                ->where('subject_code', 'LIKE', 'ALL%')
                                     ->with('semester:cate_code,cate_name');
                             },
                             'scores'
