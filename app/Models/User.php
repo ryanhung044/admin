@@ -147,10 +147,4 @@ class User extends Authenticatable
         return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code', 'narrow_major_code', 'major_code');
     }
 
-    public function subjectAll()
-    {
-        return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code')
-        ->where('subject_code', 'LIKE', 'ALL%');
-
-    }
 }
