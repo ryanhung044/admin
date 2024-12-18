@@ -149,7 +149,7 @@ class User extends Authenticatable
 
     public function subjectAll()
     {
-        return $this->belongsToMany(Subject::class)
+        return $this->belongsToMany(Subject::class, 'categories', 'cate_code', 'cate_code')
         ->where('subject_code', 'LIKE', 'ALL%');
 
     }
