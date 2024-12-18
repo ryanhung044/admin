@@ -159,7 +159,8 @@ class TeacherController extends Controller
                     'role',
                     'is_active',
                     'major_code',
-                     'narrow_major_code',
+                    'narrow_major_code',
+
                     'created_at',
                     'updated_at'
                 )->first();

@@ -57,18 +57,18 @@ class ScheduleController extends Controller
     public function index(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 7);
+            // $perPage = $request->input('per_page', 7);
 
             $student_code = request()->user()->user_code;
 
             $today = now();
 
-            $dates_want_response = [];
+            // $dates_want_response = [];
 
-            for ($i = 0; $i < 7; $i++) {
-                $today->add(new DateInterval('P1D'));
-                $dates_want_response[] = $today->format('Y-m-d');
-            }
+            // for ($i = 0; $i < 7; $i++) {
+            //     $today->add(new DateInterval('P1D'));
+            //     $dates_want_response[] = $today->format('Y-m-d');
+            // }
 
 
             $classroom_codes = ClassroomUser::where('user_code', $student_code)->pluck('class_code');
@@ -85,10 +85,11 @@ class ScheduleController extends Controller
                 'session',
                 'classroom'
             ])->whereIn('class_code', $classroom_codes)
-                ->whereIn('date', $dates_want_response)
-                // ->where('date', '>=', $today)
+                // ->whereIn('date', $dates_want_response)
+                ->where('date', '>=', $today)
                 ->orderBy('date', 'asc')
-                ->paginate($perPage)->map(function ($schedule) {
+                ->orderBy('session_code', 'asc') 
+                ->get()->map(function ($schedule) {
                     // $session_info = optional($schedule->session);
                     return [
                         'class_code'    => $schedule->classroom->class_code,

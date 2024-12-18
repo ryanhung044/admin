@@ -506,14 +506,13 @@ return response()->json($students_can_be_arrange);
                 })
                 ->whereIn('date', $data['list_study_dates'])
                     ->where('session_code', $data['session_code'])->get();
-                if($schedules->isEmpty()){
+                if(!$schedules->isEmpty()){
                         return response()->json([
                             'status' => false,
                             'message' => 'Giảng viên này không thể dạy lớp học này!'
                         ],409);
                     }
             }
-
 
 
             $now = now();
@@ -526,7 +525,6 @@ return response()->json($students_can_be_arrange);
                 "created_at" => $now,
                 "updated_at" => $now
             ];
-
             $student_codes_valid = User::whereIn('user_code', $data['student_codes'])->pluck('user_code');
 
             if ($student_codes_valid->isEmpty()) {
