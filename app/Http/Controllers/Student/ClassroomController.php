@@ -38,6 +38,7 @@ class ClassroomController extends Controller
                                 $query->where('classroom_user.user_code', $student_code)
                                     ->select('users.user_code', 'users.full_name');
                             })
+                            ->where('is_active', true)
                             ->with(['subject' => function($query){
                                 $query->select('subject_code', 'subject_name');
 

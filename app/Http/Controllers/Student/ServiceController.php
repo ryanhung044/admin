@@ -313,7 +313,7 @@ class ServiceController extends Controller
             ->first();
 
 
-        if ($existingService && $existingService->status == 'pending') {
+        if ($existingService && $existingService->status == 'pending' && $existingService->user_code = $user_code) {
             return response()->json(['message' => 'Yêu cầu thay đổi thông tin đã tồn tại. Vui lòng chờ xử lý.'], 409);
         }
 

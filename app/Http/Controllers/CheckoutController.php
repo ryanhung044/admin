@@ -60,8 +60,6 @@ class CheckoutController extends Controller
         $ipnUrl = url('/payment-callback');
 
         $extraData = json_encode(['fee_id' => $fee->id]);
-
-
         $requestId = time() . "";
         $requestType = "payWithATM";
         // $extraData = ($_POST["extraData"] ? $_POST["extraData"] : "");

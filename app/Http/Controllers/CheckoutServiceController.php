@@ -45,7 +45,6 @@ class CheckoutServiceController extends Controller
                 'user_code' => 'required|string',
             ]);
 
-            // Lấy thông tin dịch vụ
             $ServiceId = $request->input('id');
             $user_code = $request->input('user_code');
             $service = Service::find($ServiceId);
@@ -59,11 +58,13 @@ class CheckoutServiceController extends Controller
             $partnerCode = 'MOMOBKUN20180529';
             $accessKey = 'klm05TvNBzhg7h7j';
             $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
+            $orderInfo = "Thanh toán qua MoMo";
+
             $redirectUrl = url('/payment-callback/service');
             $ipnUrl = url('/payment-success/service');
 
             // Cấu hình thông tin thanh toán
-            $orderInfo = "Thanh toán qua MoMo";
+
             $amount = $service->amount;
             $orderId = time(); // Mã đơn hàng duy nhất
             $requestId = time(); // Mã yêu cầu duy nhất
@@ -112,12 +113,19 @@ class CheckoutServiceController extends Controller
             // Kiểm tra kết quả trả về
             if (isset($jsonResult['resultCode'])) {
                 switch ($jsonResult['resultCode']) {
-                    case 1001: // Insufficient funds
-                        return redirect()->back()->with('error', 'Giao dịch thất bại: Số dư không đủ để thanh toán.');
                     case 0: // Success
                         return redirect()->to($jsonResult['payUrl']);
+                    case 49: // Invalid signature
+                        Log::error("MoMo Error - Invalid Signature: " . json_encode($jsonResult));
+                        return redirect()->back()->with('error', 'Chữ ký không hợp lệ. Vui lòng kiểm tra lại cấu hình.');
+                    case 503: // Service unavailable
+                        Log::error("MoMo Error - Service Unavailable: " . json_encode($jsonResult));
+                        return redirect()->back()->with('error', 'Dịch vụ MoMo không khả dụng. Vui lòng thử lại sau.');
+                    case 1001: // Insufficient funds
+                        Log::error("MoMo Error - Insufficient Funds: " . json_encode($jsonResult));
+                        return redirect()->back()->with('error', 'Số dư không đủ để thanh toán. Vui lòng kiểm tra tài khoản.');
                     default:
-                        Log::error("MoMo API Error: " . json_encode($jsonResult));
+                        Log::error("MoMo API Error - Unknown Error: " . json_encode($jsonResult));
                         return redirect()->back()->with('error', 'Giao dịch thất bại. Vui lòng thử lại sau.');
                 }
             }

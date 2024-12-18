@@ -118,13 +118,8 @@ class ScoreController extends Controller
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
                                     ->with('semester:cate_code,cate_name');
                             },
-                            'scores' => function ($query) {
-                                $query->select('subject_code', 'score', 'is_pass')
-                                    ->with('subject:subject_code,subject_name,credit_number,semester_code,major_code')
-                                    ->with(['subject.semester' => function ($query) {
-                                        $query->select('cate_code', 'cate_name');
-                                    }]);
-                            },
+                            'scores'
+                            ,
                             'major' => function ($query) {
                                 $query->select('cate_code', 'cate_name');
                             },
@@ -132,8 +127,9 @@ class ScoreController extends Controller
                                 $query->select('cate_code', 'cate_name');
                             }
                         ])
-                        ->get(['user_code', 'major_code', 'narrow_major_code', 'semester_code']);
-
+                        ->get();
+                        // ->get(['user_code', 'major_code', 'narrow_major_code', 'semester_code']);
+                        // return $listSubject;
             $result = $listSubject->map(function ($user) {
                 $userSemesterCode = $user->semester_code; 
                 $subjectsMajor = $user->subjectMajor;
