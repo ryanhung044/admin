@@ -66,7 +66,7 @@ class ClassroomController extends Controller
             $orderBy = $request->input('orderBy', 'created_at');
             $orderDirection = $request->input('orderDirection', 'asc');
     
-            $classrooms = Classroom::select(['classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'classrooms.is_active'])
+            $classrooms = Classroom::orderBy('classrooms.is_active', "desc")->select(['classrooms.class_code', 'classrooms.class_name', 'classrooms.user_code', 'classrooms.subject_code', 'classrooms.is_active'])
             // ->where('classrooms.is_active',true)
 
                 ->when($search, function($query) use ($search) {
@@ -103,6 +103,7 @@ class ClassroomController extends Controller
                         $query->select('cate_code', 'cate_name');
                     }
                 ]);
+               
             // // Sắp xếp theo các trường liên quan đến quan hệ
             // switch ($orderBy) {
             //     case 'subject_name':
