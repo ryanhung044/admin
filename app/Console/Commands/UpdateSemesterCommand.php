@@ -38,7 +38,7 @@ class UpdateSemesterCommand extends Command
 
             if ($currentSemester) {
                 $nextSemester = DB::table('categories')
-                    ->where('value', intval($currentSemester->value) + 1) // Chuyển chuỗi thành số nguyên
+                    ->where('value', intval($currentSemester->value) - 1) // Chuyển chuỗi thành số nguyên
                     ->select('cate_code')
                     ->first();
 
