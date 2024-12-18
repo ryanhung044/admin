@@ -116,8 +116,11 @@ class ScoreController extends Controller
                             },
                             'subjectNarrowMajor' => function ($query) {
                                 $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
-                                ->where('subject_code', 'LIKE', 'ALL%') // Lấy chuyên ngành chung
-                                ->orWhere('major_code', '<>', null) // Hoặc giữ nguyên các môn thuộc chuyên ngành hẹp
+                                    ->with('semester:cate_code,cate_name');
+                            },
+                            
+                            'subjectAll' => function ($query) {
+                                $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
                                     ->with('semester:cate_code,cate_name');
                             },
                             'scores'
