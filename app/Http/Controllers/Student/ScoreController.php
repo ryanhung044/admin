@@ -119,10 +119,7 @@ class ScoreController extends Controller
                                     ->with('semester:cate_code,cate_name');
                             },
                             
-                            'subjectAll' => function ($query) {
-                                $query->select('subject_code', 'subject_name', 'credit_number', 'semester_code', 'major_code')
-                                    ->with('semester:cate_code,cate_name');
-                            },
+                            'subjectAll',
                             'scores'
                             ,
                             'major' => function ($query) {
