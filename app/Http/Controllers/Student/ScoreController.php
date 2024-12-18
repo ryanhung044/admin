@@ -208,7 +208,7 @@ class ScoreController extends Controller
             Log::error(__CLASS__ . '@' . __FUNCTION__, [$th]);
 
             return response()->json([
-                'message' => 'Lỗi không xác định!'
+                'message' => 'Lỗi không xác định! ' . $th
             ], 500);
         }
     }
